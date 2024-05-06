@@ -34,5 +34,24 @@ class UserRepository {
             }
         });
     }
+    verifyOtp(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log("create user worked in repo :", data);
+                const { otp } = data;
+                // const existUser = await UserModel.findOne({userName:userName,email:email})
+                // if(existUser) {
+                //     return {duplicate : true , success:true}
+                // } 
+                // const newUser = new UserModel(user)
+                // await newUser.save()
+                return { duplicate: false, success: true };
+            }
+            catch (error) {
+                console.log(error);
+                return { duplicate: false, success: false };
+            }
+        });
+    }
 }
 exports.default = UserRepository;

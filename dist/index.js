@@ -30,5 +30,5 @@ function getMongoDS() {
 (() => __awaiter(void 0, void 0, void 0, function* () {
     const dataSource = yield getMongoDS();
     const newServer = (0, app_1.createServer)();
-    newServer === null || newServer === void 0 ? void 0 : newServer.listen(5000, () => console.log('Running on http://localhost:4000'));
+    newServer === null || newServer === void 0 ? void 0 : newServer.listen(5000, () => console.log('Running on http://localhost:5000'));
 }))();

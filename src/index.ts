@@ -1,5 +1,7 @@
 import {createServer as server} from './infrastructure/config/app';
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config(); 
 
 async function getMongoDS() {
     try {
@@ -10,11 +12,11 @@ async function getMongoDS() {
         console.error('MongoDB connection error:', error);
         throw error; // Rethrow the error for further handling or termination
     }
-} 
+}  
 
 (async () => { 
     const dataSource = await getMongoDS();
     const newServer =  server()
-    newServer?.listen(5000, () => console.log('Running on http://localhost:4000'));
+    newServer?.listen(5000, () => console.log('Running on http://localhost:5000'));
 })();
  

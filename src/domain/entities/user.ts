@@ -30,3 +30,6 @@ export default interface UserI {
     isDeleted:Boolean
     creationTime:Date
 }
+export interface Otp {
+    otp:number
+}

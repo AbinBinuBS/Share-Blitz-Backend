@@ -8,10 +8,12 @@ exports.createServer = void 0;
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
 const userRoute_1 = __importDefault(require("../routes/user/userRoute"));
+const cors_1 = __importDefault(require("cors"));
 const createServer = () => {
     try {
         const app = (0, express_1.default)();
         app.use(express_1.default.json());
+        app.use((0, cors_1.default)());
         app.use(express_1.default.urlencoded({ extended: true }));
         // app.use(cookieParser())
         // app.use(

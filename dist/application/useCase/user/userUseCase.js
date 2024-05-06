@@ -24,5 +24,17 @@ class UserUseCase {
             }
         });
     }
+    VerifyOtp(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('verify otp worked in repo :', data);
+                const product = yield this.userRepository.verifyOtp(data);
+                return product;
+            }
+            catch (error) {
+                console.log(error);
+            }
+        });
+    }
 }
 exports.default = UserUseCase;
