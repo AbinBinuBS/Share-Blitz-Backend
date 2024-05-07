@@ -15,9 +15,10 @@ const router = express.Router()
 // router.post('/createUser', (req, res) => {controller.createUser(req, res) });
 router.post('/createUser', (req, res) => { controller.sendOtp(req, res) });
 router.post('/verifyOtp', (req, res) => { controller.verifyOtp(req, res) });
+router.post('/login', (req, res) => { controller.login(req, res) });
 // router.get('/getSingleProduct',(req,res)=>{controller.getSingleProduct(req,res)})
 // router.get('/p',(req,res)=>{controller.getSingleProduct(req,res)})
 // router.get('/getAllProducts',(req,res)=> {controller.getAllProduct(req,res)})  
 
 
-export default router
+export default router 

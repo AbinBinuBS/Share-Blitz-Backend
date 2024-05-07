@@ -1,6 +1,6 @@
 import mongoose, { Schema, Model } from "mongoose";
 import UserI  from "../../../domain/entities/user";
-import {AvailableUserRoles,UserRolesEnum} from "../../constants/userConstants"
+import {AvailableSocialLogins, AvailableUserRoles,UserLoginType,UserRolesEnum} from "../../constants/userConstants"
 
 const userSchema:Schema<UserI>=new Schema({
     name: {
@@ -50,6 +50,11 @@ const userSchema:Schema<UserI>=new Schema({
         type: String, 
         enum:AvailableUserRoles,
         default: UserRolesEnum.USER  
+    },
+    loginType:{
+        type:String,
+        enum:AvailableSocialLogins,
+        default:UserLoginType.EMAIL_PASSWORD
     },
     location:{
         type:String,

@@ -6,8 +6,9 @@
 
 import jwt from 'jsonwebtoken'
 
-import IUserRepository from "../../../../application/useCase/interface/user/userRepositoryInterface";
-import { Otp, UserRequestModel } from "../../../../domain/entities/user";
+import IUserRepository from "../../../../domain/interface/repositories/user/userRepositoryInterface";
+import {UserWithoutCredential} from "../../../../domain/interface/repositories/user/userRepositoryInterface"
+import { Otp, UserLogin, UserRequestModel } from "../../../../domain/entities/user";
 import UserModel from "../../models/userModel";
 
 class UserRepository implements IUserRepository {
@@ -64,6 +65,15 @@ class UserRepository implements IUserRepository {
           return null;
         }
       }
+    async login (email:UserLogin) {
+
+    }
+    async getUserById(userId:string) :Promise<UserWithoutCredential | null> {
+      const userData  = await UserModel.findById(userId).select(
+        "-password"
+      );
+      return userData
+    }
 
 
 }

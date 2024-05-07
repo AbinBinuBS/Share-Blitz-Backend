@@ -4,7 +4,7 @@ import IJwtToken from "../../../application/useCase/interface/user/jwtInterface"
 
 import { Request, Response, response } from "express";
 import userUseCase from "../../../application/useCase/user/userUseCase";
-import { Otp, UserRequestModel } from "../../../domain/entities/user";
+import { Otp, UserLogin, UserRequestModel } from "../../../domain/entities/user";
 import jwt from 'jsonwebtoken'
 
 class productController {
@@ -70,7 +70,31 @@ class productController {
             console.log(error)
         }
     }
-    
+
+    async login(req:Request,res:Response) : Promise <any> {
+        try {
+            console.log("Login in controller worked")
+            const {email,password} = req.body
+            if(!email || !password)
+                return res.status(200).json({success:false,message:"Email and Password are required"})
+
+            const responseData : any = await this.userCase.login(req.body as UserLogin)
+            if(responseData?.success){
+                res.cookie("userToken", responseData.token, {
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly: true,
+                  });
+               return res.status(200).json({success:true,token:responseData.token,user:responseData.user})
+            } else {
+                return res.status(200).json({success:false,message:responseData?.message})
+            }
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({message:"Internal server error!"})
+        }
+    }
+
+     
 
     // async addProduct(req: Request , res : Response) {
     //     try {

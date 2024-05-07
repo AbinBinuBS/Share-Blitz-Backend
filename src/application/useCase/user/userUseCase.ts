@@ -1,10 +1,13 @@
 
-
-import { Otp, UserRequestModel } from "../../../domain/entities/user";
-import IJwtToken from "../interface/user/jwtInterface";
-import IUserRepository from "../interface/user/userRepositoryInterface";
 import jwt from "jsonwebtoken";
 
+
+import { Otp, UserLogin, UserRequestModel } from "../../../domain/entities/user";
+import IJwtToken from "../interface/user/jwtInterface";
+import IUserRepository from "../interface/user/userRepositoryInterface";
+import UserI from "../../../domain/entities/user";
+import User from "../../../domain/interface/repositories/user/userInterface";
+import { UserLoginType } from "../../../infrastructure/constants/userConstants";
 class UserUseCase {
     private userRepository: IUserRepository;
     private jwtToken : IJwtToken
@@ -86,22 +89,43 @@ class UserUseCase {
         }
     }
 
-    // async getAllProduct () {
-    //     try {
-    //         const productData = await this.iProductRepository.getAllProduct()
-    //         return productData
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
-    // async getSingleProduct (name:string) {
-    //     try {
-    //         const singleProductData = await this.iProductRepository.getSingleProduct(name)
-    //         return singleProductData
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // }
+     async login (loginData:UserLogin) {
+        try {
+            const { email ,password} = loginData
+            const findUser : UserI = await this.userRepository.findByEmail(email)
+            if(findUser){
+                if (findUser.loginType !== UserLoginType.EMAIL_PASSWORD) {
+                    // If user is registered with some other method, we will ask him/her to use the same method as registered.
+                    // This shows that if user is registered with methods other than email password, he/she will not be able to login with password. 
+                   return { success:false,
+                      message:
+                      "You have previously registered using " +
+                        findUser.loginType?.toLowerCase() +
+                        ". Please use the " +
+                        findUser.loginType?.toLowerCase() +
+                        " login option to access your account." 
+
+                   };
+                  }
+                // let passwordMatch = await this.hashedPassword.compare(password,findUser.password)
+                if(findUser.password !== password) { // replace it with passwordMatch later
+                    return {success:false,message:' Incorrect password'}
+                } else if (findUser.isBlocked){
+                    return {success:false,message:"User is temporarily Blocked"}
+                } else {
+                    let token = this.jwtToken.createJwt(findUser._id,"user");
+                    const loggedUserData = await this.userRepository.getUserById(findUser._id as string)
+                    console.log('user data to send ;',loggedUserData)
+                    return {success:true,user:loggedUserData,token:token}
+                }
+            }
+            return {success:false,message:"User not found "}
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
 
 
 }

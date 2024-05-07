@@ -17,11 +17,9 @@ export const createServer = () => {
         //         credentials: true
         //     })
         // )ssssss22222222vvSDzz
-        // app.use('/api/seller', sellerRoute)
-        // app.use('/api/buyer', buyerRoute)
+  
         // app.use('/api/admin', adminRoute)
-        // app.use('/api/chat', chatRoute)
-        // app.use('/api/book',reservationRoute)
+        
         // 204795v22222222vv
         app.use('/api/user',userRoute)
         const server = http.createServer(app)

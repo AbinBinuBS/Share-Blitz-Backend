@@ -1,4 +1,4 @@
-import { UserRoles } from "../../infrastructure/constants/userConstants"
+import { UserRoles,UserLoginT } from "../../infrastructure/constants/userConstants"
 
 export interface UserRequestModel {
     name: string,
@@ -25,10 +25,15 @@ export default interface UserI {
     backgroundImageUrl:string
     role:UserRoles
     location:string
+    loginType:UserLoginT
     isVerified:Boolean
     isBlocked:Boolean
     isDeleted:Boolean
     creationTime:Date
+}
+export interface UserLogin {
+    email:string
+    password:string
 }
 export interface Otp {
     otp:number
