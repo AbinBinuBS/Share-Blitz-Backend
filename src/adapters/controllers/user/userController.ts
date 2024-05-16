@@ -7,7 +7,7 @@ import userUseCase from "../../../application/useCase/user/userUseCase";
 import { Otp, UserLogin, UserRequestModel } from "../../../domain/entities/user";
 import jwt from 'jsonwebtoken'
 
-class productController {
+class userController {
     private userCase : userUseCase
     constructor(userCase: userUseCase){
         this.userCase = userCase;
@@ -40,7 +40,7 @@ class productController {
                return res.status(201).send(response)
             }
             return res.status(200).send(response)
-        } catch (error) {
+        } catch (error) { 
             res.status(500).send('Something went wrong')
             console.log(error)
         }
@@ -71,6 +71,37 @@ class productController {
         }
     }
 
+    async resendOtp(req:Request,res:Response ): Promise<any> {
+        try {
+            console.log('re send otp controller worked')
+
+          
+            console.log(req.body)
+            let token = req.headers.authorization?.split(' ')[1] as string ;
+                console.log('token conteoller :---------',token)
+            const responseData : any = await this.userCase.resendOtp(token)
+            console.log("response data ;",responseData)
+            // if(responseData.userExists)
+            //   return  res.status(409).send({success:false,message:'User already exists'})
+          
+            if(responseData.success){
+                const token = responseData?.data.token;
+                console.log("sendotp controller token:",token)
+               return res.status(200).json({success: true ,token:token})
+            } else {
+               return  res.status(409).json({success:false,message:'something went wrong !'})
+            }
+        
+          
+            // return res.status(200).send(data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+
+
     async login(req:Request,res:Response) : Promise <any> {
         try {
             console.log("Login in controller worked")
@@ -96,44 +127,78 @@ class productController {
 
      
 
-    // async addProduct(req: Request , res : Response) {
-    //     try {
-    //         const {name ,description} = req.body;
-    //         console.log("worked controller :",req.body)
-    //         const product = await this.productCase.addProduct(name,description)
-    //         if(product){
-    //         return res.status(201).send(product)
-    //         }
-    //     } catch(error) {
-    //         res.status(500).send('Something went wrong')
-    //     }
-    // }
-    // async getAllProduct( req:Request,res : Response) {
-    //     try{
-    //         const productData = await this.productCase.getAllProduct()
-    //         if(productData) {
-    //             return res.status(200).send(productData)
-    //         }
-    //     } catch(error){
-    //         console.log(error)
-    //     }
-    // }
-    // async getSingleProduct (req : Request ,res:Response) {
-    //     try {
-    //         console.log("get single product worked in controller")
-    //         console.log(req.query)
-    //         const singleProductData = await this.productCase.getSingleProduct( req?.query?.name as string)
-    //         console.log('singleProductData :',singleProductData)
-    //         if(singleProductData.success) {
-    //             return res.status(200).send(singleProductData)
-    //         }
-    //         return res.status(500).send(singleProductData)
-    //     } catch(error) {
-    //         res.status(500).send('Something went wrong')
-    //         console.log(error)
-    //     }
-    // }
+     async Gsignup (req : Request ,res:Response) {
+        try {
+            console.log("G signup worked in controller")
+            console.log(req.body)
+            const {name,userName,email,picture} = req.body
+            const user = await this.userCase.Gsignup(name,userName, email, picture);
+            if(user?.success){
+                res.cookie("userToken", user.token, {
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly: true,
+                  });
+               return res.status(200).json({success:true,token:user.token,user:user.user})
+            } else {
+                return res.status(200).json({success:false,message:user?.message})
+            }
+       
+        } catch(error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async Glogin (req : Request ,res:Response) {
+        try {
+            console.log("G login worked in controller")
+            console.log(req.body)
+            const {email} = req.body
+            const user = await this.userCase.Glogin( email);
+            if(user?.success){
+                res.cookie("userToken", user.token, {
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly: true,
+                  });
+               return res.status(200).json({success:true,token:user.token,user:user.user})
+            } else {
+                return res.status(200).json({success:false,message:user?.message})
+            }
+       
+        } catch(error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+    async getUser (req : Request ,res:Response) {
+        try {
+            console.log("Get user worked in controller")
+            console.log(req.query)
+            const {userId} = req.query
+            const userData = await this.userCase.getUser(userId as string)
+            console.log(userData)
+            if(!userData?.success)
+                return res.status(200).json({success:false,message:'user not exists'})
+                
+                return res.status(200).json({success:true,user:userData.user})
+
+            // const user = await this.userCase.Glogin( email);
+            // if(user?.success){
+            //     res.cookie("userToken", user.token, {
+            //         expires: new Date(Date.now() + 25892000000),
+            //         httpOnly: true,
+            //       });
+            //    return res.status(200).json({success:true,token:user.token,user:user.user})
+            // } else {
+            //     return res.status(200).json({success:false,message:user?.message})
+            // }
+       
+        } catch(error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
 }
 
 
-export default productController;
+export default userController;

@@ -21,7 +21,7 @@ const userSchema:Schema<UserI>=new Schema({
     },
     mobile: {
         type: String,
-        required: true,
+        required: false,
         validate: {
             validator: function(v: string) {
                 return /\d{10}/.test(v); 
@@ -78,5 +78,5 @@ const userSchema:Schema<UserI>=new Schema({
     }
 });
 
-const UserModel:Model<UserI>=mongoose.model<UserI>('user',userSchema);
+const UserModel:Model<UserI>=mongoose.model<UserI>('User',userSchema);
 export default UserModel
