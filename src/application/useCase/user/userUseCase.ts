@@ -11,6 +11,8 @@ import User from "../../../domain/interface/repositories/user/userInterface";
 import { UserLoginType } from "../../../infrastructure/constants/userConstants";
 import HashPasswordInterface from "../../../domain/interface/helpers/hashPasswordInterface";
 import { GUserData } from "../../../domain/interface/repositories/user/userRepositoryInterface";
+import { EditProfileUserDataInterface } from "../../../domain/interface/controllers/userControllerInterface";
+import sendEmail from "../../../infrastructure/utils/helpers/NodeMailer";
 class UserUseCase {
     private userRepository: UserRepositoryInterface;
     private jwtToken : IJwtToken
@@ -47,7 +49,8 @@ class UserUseCase {
                 }
                 if( otp == decodedToken.otp) {
                     console.log('otp match')
-                    const hashedPassword = decodedToken.user.password
+                    // const hashedPassword = decodedToken.user.password
+                    const hashedPassword = await this.hashPassword.createHash(decodedToken.user.password)
                     decodedToken.user.password = hashedPassword;
                     
                     const saveUser = await this.userRepository.createUser(decodedToken.user)
@@ -73,7 +76,7 @@ class UserUseCase {
           
             const userExists = await this.userRepository.findByEmail(user.email)
             console.log(userExists)
-            
+             
             if(userExists){
                 return {
                     success:false ,userExists:true
@@ -81,6 +84,8 @@ class UserUseCase {
             }
             let otp =generateOTP()
             console.log('generated otp ',otp)
+            const sendEmaill = await sendEmail(user.email,otp)
+
             const otpExpiration = new Date();
                 otpExpiration.setMinutes(otpExpiration.getMinutes() + 1);
             let token = jwt.sign(
@@ -92,7 +97,7 @@ class UserUseCase {
               let decodeToken = this.jwtToken.verifyJwt(token)
               console.log('decoded token',decodeToken)
 
-            return {success:true,data:{data:false,token:token}}
+            return {success:true,data:{data:false,token:token},userExists:false}
         } catch (error) {
             console.log(error)
         }
@@ -113,6 +118,8 @@ class UserUseCase {
          
             let otp =generateOTP()
             console.log('generated otp ',otp)
+            const sendEmaill = await sendEmail(userData.email,otp)
+
             const otpExpiration = new Date();
                 otpExpiration.setMinutes(otpExpiration.getMinutes() + 1);
             let token = jwt.sign(
@@ -124,7 +131,7 @@ class UserUseCase {
               let decodeToken = this.jwtToken.verifyJwt(token)
               console.log('decoded token',decodeToken) 
 
-            return {success:true,data:{data:false,token:token}}
+            return {success:true,data:{data:false,token:token},userExists:false}
         } catch (error) {
             console.log(error)
         }
@@ -148,8 +155,10 @@ class UserUseCase {
 
                    };
                   }
-                // let passwordMatch = await this.hashedPassword.compare(password,findUser.password)
-                if(findUser.password !== password) { // replace it with passwordMatch later
+            //  const hashedPassword = await this.hashPassword.createHash(email)
+                let passwordMatch = await this.hashPassword.compare(password,findUser.password)
+                console.log('password match :',passwordMatch)
+                if(!passwordMatch) { // replace it with passwordMatch later
                     return {success:false,message:' Incorrect password'}
                 } 
                  if (findUser.isBlocked){
@@ -159,7 +168,7 @@ class UserUseCase {
                   let token =  jwt.sign(
                         {userId: findUser._id,role:'USER'},
                         process.env.JWT_KEY as string,
-                        { expiresIn: "5m" } 
+                        { expiresIn: "60m" } 
                       );
                     // console.log('login usecase toekn :',token)
                     const verify = this.jwtToken.verifyJwt(token)
@@ -175,7 +184,7 @@ class UserUseCase {
         }
     }
 
-    async Gsignup(name:string,userName:string,email:string,picture:string,)  {
+    async Gsignup(name:string,userName:string,email:string,picture:string)  {
         try {
             const userExists = await this.userRepository.findByEmail(email as string)
             if(userExists)
@@ -202,9 +211,7 @@ class UserUseCase {
             const findUser : UserI = await this.userRepository.findByEmail(email)
             if(findUser){
                 if (findUser.loginType !== UserLoginType.GOOGLE) {
-                    // If user is registered with some other method, we will ask him/her to use the same method as registered.
-                    // This shows that if user is registered with methods other than email password, he/she will not be able to login with password. 
-                   return { success:false,
+                 return { success:false,
                       message:
                       "You have previously registered using " +
                         findUser.loginType?.toLowerCase() +
@@ -243,6 +250,51 @@ class UserUseCase {
         } catch (error) {
          console.log(error)
         } 
+     }
+
+     async editUserProfile(userId:string , userData :EditProfileUserDataInterface )  {
+        try {
+
+        
+            const userExists = await this.userRepository.getUserById(userId) 
+            if(!userExists)
+                return {success : false,message:'user not exists'}
+            const updateUser = await this.userRepository.updateUserProfile(userId,userData) 
+            if(updateUser.success){
+            const userData = await this.userRepository.getUserById(userId) 
+                return {success:true,data:userData}
+            }
+             return {success:false ,messgage:updateUser.message}
+            
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async savePost(userId : string,postId : string)  {
+        try {
+             const user = await this.userRepository.getUserById(userId)
+             if (user) {
+                if (user.savedPost.some(saved => saved.postId === postId)) {
+                  console.log('post already saved');
+                  return { success: false, message: "Post already saved" };
+                } else {
+                  // Add logic to save the post if it's not already saved
+                  // Example:
+                  const savePost = await this.userRepository.savePost(userId,postId)
+                  if(savePost.success){
+                    return {success:true}
+                  }
+        
+                  return { success: true, message: "Post saved successfully" };
+                }
+              }
+              return { success: false, message: "User not found" };
+        } catch (error) {
+         console.log(error)
+         return {success:false,message:"Something went wrong"}
+
+        }
      }
 
 

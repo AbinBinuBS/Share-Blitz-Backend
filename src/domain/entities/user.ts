@@ -12,7 +12,9 @@ export interface UserResponseModel {
     name: string,
     email :string
 }
-
+interface IFollow {
+    id: string;
+  }
 export default interface UserI {
     _id:string
     name: string
@@ -21,6 +23,7 @@ export default interface UserI {
     mobile:string
     password:string,
     bio :string
+    dob:string
     profileImageUrl:string
     backgroundImageUrl:string
     role:UserRoles
@@ -30,6 +33,9 @@ export default interface UserI {
     isBlocked:Boolean
     isDeleted:Boolean
     creationTime:Date
+    followings:IFollow[]
+    followers:IFollow[]
+    savedPost:savedPost[]
 }
 export interface UserLogin {
     email:string
@@ -37,4 +43,8 @@ export interface UserLogin {
 }
 export interface Otp {
     otp:number
+}
+
+export interface savedPost {
+    postId:string
 }

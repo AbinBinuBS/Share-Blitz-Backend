@@ -1,18 +1,9 @@
-import {createServer as server} from './infrastructure/config/app';
-import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import {createServer as server} from './infrastructure/config/app';
+import getMongoDS from './infrastructure/database/Connection/Mongodb';
 dotenv.config(); 
 
-async function getMongoDS() {
-    try {
-        await mongoose.connect('mongodb://localhost:27017/shareBlitz');
-        console.log('MongoDB database connection established successfully 🚀');
-        return
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        throw error; // Rethrow the error for further handling or termination
-    }
-}  
+
 
 (async () => { 
     const dataSource = await getMongoDS();

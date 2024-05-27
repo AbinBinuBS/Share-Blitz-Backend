@@ -1,7 +1,8 @@
 // import express from "express";
 import express from 'express'
 import http from 'http'
-import userRoute from '../routes/user/userRoute'
+import authRoute from '../routes/user/authRoute'
+import userRoute from '../routes/user/userRoutes'
 import postRoute from '../routes/user/postRoute'
 import adminRoute from '../routes/user/adminRoute'
 import cors from 'cors';
@@ -12,9 +13,10 @@ export const createServer = () => {
         app.use(cors())
         app.use(express.urlencoded({ extended: true }))
        
-        app.use('/api/user',userRoute)
+        app.use('/api/auth',authRoute)
         app.use('/api/post',postRoute)
         app.use('/api/admin',adminRoute)
+        app.use('/api/user',userRoute)
         const server = http.createServer(app)
 
         return server;

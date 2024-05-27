@@ -1,6 +1,9 @@
 import mongoose, { Schema, Model } from "mongoose";
 import UserI  from "../../../domain/entities/user";
+import LikesModel from "./likesModel";
 import {AvailableSocialLogins, AvailableUserRoles,UserLoginType,UserRolesEnum} from "../../constants/userConstants"
+import CommentsModel from "./commentsModel";
+import ConnectionModel from "./connectionsModel";
 
 const userSchema:Schema<UserI>=new Schema({
     name: {
@@ -38,13 +41,20 @@ const userSchema:Schema<UserI>=new Schema({
         type:String,
         required:false,
     },
+    dob:{
+        type:String,
+        required:false,
+    },
     profileImageUrl:{
         type:String,
         required:false,
+        default:`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4eMoz7DH8l_Q-iCzSc1xyu_C2iryWh2O9_FcDBpY04w&s`
     }, 
     backgroundImageUrl:{
         type:String,
         required:false,
+        default:  `https://e0.pxfuel.com/wallpapers/105/23/desktop-wallpaper-compromised-character-gaming-profile-dark-cute-cartoon-boys-thumbnail.jpg`,
+         
     },
     role: {
         type: String, 
@@ -75,8 +85,38 @@ const userSchema:Schema<UserI>=new Schema({
     creationTime: {
         type: Date,
         default: Date.now
-    }
+    },
+    savedPost :[{
+        postId:{type:String,required:false}
+    }],
+    followings:[{
+        id:{type:String,required:true}
+
+    }],
+    followers:[{
+        id:{type:String,required:true}
+
+    }]
 });
+
+
+
+
+userSchema.post("save", async function (user, next) {
+
+    const connections = await ConnectionModel.findOne({userId:user._id})
+ 
+      if (!connections) {
+      await ConnectionModel.create({
+        userId: user._id,
+        followings:[],
+        followers:[]
+      });
+    }
+    next();
+  });
+
+  
 
 const UserModel:Model<UserI>=mongoose.model<UserI>('User',userSchema);
 export default UserModel

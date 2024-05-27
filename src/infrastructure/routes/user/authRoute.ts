@@ -1,10 +1,14 @@
 
 import express from "express"
-import userController from '../../../adapters/controllers/user/userController'
+import { Response } from "express"
+import { CustomRequest } from "../../../domain/interface/controllers/userControllerInterface"
+import userController from '../../../adapters/controllers/user/authController'
 import userRepository from '../../database/repositories/user/userRepository'
 import UserUseCase from '../../../application/useCase/user/userUseCase'
 import JWTtoken from "../../utils/helpers/jwtToken"
 import hashPassword from "../../utils/helpers/hashPassword"
+import { RequestWithUserId } from "../../../domain/interface/controllers/userControllerInterface"
+import userAuth from "../../middleware/authMiddleware"
 const repository = new userRepository()
 const jwt = new JWTtoken
 const hashedPassword = new hashPassword()
@@ -23,6 +27,10 @@ router.post('/glogin', (req, res) => { controller.Glogin(req, res) });
 router.get('/getUser', (req, res) => { controller.getUser(req, res) });
 router.post('/resendOtp', (req, res) => { controller.resendOtp(req, res) });
 
+
+router.patch('/editProfile',userAuth, (req :CustomRequest, res :Response) => { controller.editProfile(req, res) });
+
  
+
 
 export default router 

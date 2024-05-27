@@ -10,6 +10,7 @@ import IUserRepository, { toogleStatusInterface } from "../../../../domain/inter
 import {UserWithoutCredential,GUserData,getAllUsersInterface} from "../../../../domain/interface/repositories/user/userRepositoryInterface"
 import { Otp, UserLogin, UserRequestModel } from "../../../../domain/entities/user";
 import UserModel from "../../models/userModel";
+import { EditProfileUserDataInterface } from '../../../../domain/interface/controllers/userControllerInterface';
 
 class UserRepository implements IUserRepository {
 
@@ -125,11 +126,53 @@ class UserRepository implements IUserRepository {
       }
     } catch (error) {
       console.log(error);
-      return {success:true , message:"Something went wrong"}
+      return {success:false , message:"Something went wrong"}
     }
   }
+  
+  async updateUserProfile(userId: string ,userData:EditProfileUserDataInterface) :Promise<any> {
+    try {
+      console.log('field',userData)
+      const userExists = await UserModel.findById(userId);
+      if (userExists) {
+       userExists.name = userData.name
+       userExists.userName = userData.userName
+       userExists.email = userData.email
+       userExists.mobile = userData.mobile
+       userExists.bio = userData.bio 
+       userExists.dob = userData.dob
+       userExists.profileImageUrl = userData.profileImageUrl
+       if( await userExists.save()) 
+        return {success:true}
+       return {success:false , message:"Failed to update profile"}
 
+      } else {
+        return {success:false ,message:"User not found"}
+      }
+     
+    } catch (error) {
+      console.log(error);
+      return {success:false , message:"Something went wrong"}
+    }
+  }
+  async savePost(userId: string,postId:string) :Promise<any> {
+    try {
+      
+      const userExists = await UserModel.findById(userId);
+      if (userExists) {
+       userExists.isBlocked = !userExists.isBlocked
+       if( await userExists.save()) 
+        return {success:true , data:!userExists}
+       return {success:true , message:"Failed to change status"}
 
+      } else {
+        return {success:false ,message:"User not found"}
+      }
+    } catch (error) {
+      console.log(error);
+      return {success:false , message:"Something went wrong"}
+    }
+  }
 }
 
 export default UserRepository

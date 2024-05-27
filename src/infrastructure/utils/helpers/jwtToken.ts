@@ -15,7 +15,7 @@ class JWTtoken implements IJwtToken{
             const jwtKey=process.env.JWT_KEY as string
             console.log('env....',jwtKey)
             console.log('env....',token)
-            const decode=jwt.verify(token,jwtKey) as JwtPayload
+            const decode=jwt.verify(token,jwtKey) as JwtPayload  
             return decode
         }catch(error){
             console.log(error)

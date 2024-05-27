@@ -34,6 +34,7 @@ interface CustomRequest extends Request {
                 return res.status(403).send({success:false,message:'User is blocked !!'})
             }else{
                 req.userId=decoded.userId
+               
                 next()
             }
         }else{
