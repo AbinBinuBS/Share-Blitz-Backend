@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 export default interface PostInterface {
+    _id:string
     userId: mongoose.Schema.Types.ObjectId
     imageUrl : string
     caption:string

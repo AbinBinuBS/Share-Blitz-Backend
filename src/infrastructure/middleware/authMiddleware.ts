@@ -4,6 +4,7 @@ import { NextFunction } from "express"
 import { Request, Response, } from "express";
 import { UserRolesEnum } from "../constants/userConstants";
 import { UserWithoutCredential } from "../../domain/interface/repositories/user/userRepositoryInterface";
+import { JwtPayload } from "jsonwebtoken";
 const userRepository = new UserRepository()
 const jwt = new JWTtoken()
 // import jwt,{JwtPayload} from 'jsonwebtoken'
@@ -16,15 +17,11 @@ interface CustomRequest extends Request {
 
  const userAuth =  async (req: CustomRequest ,res: Response,next: NextFunction) => {
    try {
-    console.log('................................user auth')
     if(req.headers.authorization) {
         const token = req.headers.authorization
-        console.log('Token :',token)
 
         const decoded = jwt.verifyJwt(token)
-        // const decoded=jwt.verify(token,process.env.JWT_KEY as string) 
 
-        console.log('decode --------',decoded)
         if(decoded && decoded.role !== UserRolesEnum.USER)
             return res.status(403).json({success:false,message:"Unauthorized"})
         if(decoded && decoded.userId){
@@ -47,34 +44,50 @@ interface CustomRequest extends Request {
     console.log(error)
    }
 }
+
 export default userAuth
 
 
-// const protect = asyncHandler(async (req,res,next) => {
-//     let token
-// console.log("Auth jwt")
-//     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-//         try {
-//             // Get token from header
-//             token = req.headers.authorization.split(' ')[1]
-//             console.log('Token : ',token)
+export const adminAuth = async (req: CustomRequest, res: Response, next: NextFunction) => {
+    try {
+        
+        const token = req.headers.authorization;
 
-//             //  Verify the token 
-//             const decoded = jwt.verify(token, process.env.JWT_SECRET)
-//             console.log('Decoded : ',decoded)
-//             // Get user from token 
-//             req.user = await User.findById(decoded.id).select('-password')
-//             console.log('User',req.user)
-//             next()
-//         } catch (error){
-//             console.log(error)
-//             res.status(401)
-//             throw new Error('Not authorized ')
-//         }
-//     }
-//     if(!token) {
-//         res.status(401)
-//         throw new Error('Not authorized , no token')
-//     }
-// })
-// module.exports ={ protect}
+        if (!token) {
+            console.log("Not token")
+            return res.status(401).json({ success: false, message: "Unauthorized - Invalid token format" });
+        }
+
+        let decoded: JwtPayload | null = null;
+        try {
+            decoded = jwt.verifyJwt(token);
+        } catch (err) {
+            return res.status(401).json({ success: false, message: "Unauthorized - Invalid token" });
+        }
+
+        console.log('Decoded:', decoded);
+        if (decoded && decoded.role !== UserRolesEnum.ADMIN) {
+            return res.status(403).json({ success: false, message: "Unauthorized - Insufficient privileges" });
+        }
+
+        const adminData: UserWithoutCredential | null = await userRepository.getUserById(decoded?.userId);
+        if (!adminData) {
+            return res.status(404).json({ success: false, message: "Admin not found" });
+        }
+
+        if (adminData.isBlocked) {
+            return res.status(403).json({ success: false, message: "Admin is blocked" });
+        }
+
+        req.userId = decoded?.userId;
+        console.log("verified")
+        next();
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+
+

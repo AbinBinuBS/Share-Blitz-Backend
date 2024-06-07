@@ -44,6 +44,18 @@ class PostUseCase {
         }
      }
 
+     async getPostById( userId : string )  {
+        try {
+             const post = await this.postRepository.getPostById( userId)
+             if(post.success){
+                 return {success:true,postData:post.data}
+             }
+             return {success:false,message:"Something went wrong"}
+        } catch (error) {
+         console.log(error)
+        }
+     }
+
      async getUserPosts(userId : string)  {
         try {
              const post = await this.postRepository.getUserPosts(userId)
@@ -111,16 +123,53 @@ class PostUseCase {
              if(!post.success){
                  return {success:false,message: "Comment collection not found"}
              }
-            //  if (post && post.data.likes.length && post.data.likes.some((users: { userId: string }) => users.userId == userId)) {
-            //     console.log("User already follows the target user")
-            //     return { success: false, message: "Post already liked " };
-            // }
+
             const commentPost :CommentOnPostResponse =  await this.postRepository.addComment(postId,userId,comment)
             if(!commentPost.success){
                 return {success:false,message:commentPost.message}
             }
 
             return {success:true,data:commentPost.data}
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async reportPost(postId : string ,userId:string, reason : string)  {
+        try {
+            console.log("comment post in usecase")
+            console.log("postID",postId,"comment",reason)
+             const post = await this.postRepository.findPostById(postId)
+             if(!post.success){
+                 return {success:false,message: post?.message}
+             }
+
+            const reportPost :CommentOnPostResponse =  await this.postRepository.reportPost(postId,userId,reason)
+            if(!reportPost.success){
+                return {success:false,message:reportPost.message}
+            }
+
+            return {success:true,data:reportPost.data}
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async blockPost(postId : string ,userId:string)  {
+        try {
+            console.log("comment post in usecase")
+             const post = await this.postRepository.findPostById(postId)
+             if(!post.success){
+                 return {success:false,message: post?.message}
+             }
+
+            // const reportPost :CommentOnPostResponse =  await this.postRepository.reportPost(postId,userId,reason)
+            // if(!reportPost.success){
+            //     return {success:false,message:reportPost.message}
+            // }
+
+            // return {success:true,data:reportPost.data}
+            return {success:true,data:[]}
         } catch (error) {
          console.log(error)
         } 

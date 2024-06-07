@@ -66,6 +66,46 @@ class ConnectionRepository implements ConnectionRepositoryInterface {
             return {duplicate: false,success:false}
         }
     } 
+
+    async removeFollowerById(userId:string,targetId:string):Promise<any> {
+        try {
+            
+            const result = await ConnectionModel.findOneAndUpdate(
+                {userId},
+                { $pull: { followers: { userId:targetId }} },
+                { new: true, useFindAndModify: false }
+            );
+        
+            console.log("result ",result)
+            if(result)
+                return {success:true}
+            return {success:false,message:"Failed to follow the user"}
+           
+        } catch (error) {
+            console.log(error)
+            return {duplicate: false,success:false}
+        }
+    } 
+
+    async removeFollowingById(userId:string,targetId:string):Promise<any> {
+        try {
+            
+            const result = await ConnectionModel.findOneAndUpdate(
+                {userId},
+                { $pull: { followings: { userId:targetId }} },
+                { new: true, useFindAndModify: false }
+            );
+        
+            console.log("result ",result)
+            if(result)
+                return {success:true}
+            return {success:false,message:"Failed to follow the user"}
+           
+        } catch (error) {
+            console.log(error)
+            return {duplicate: false,success:false}
+        }
+    } 
     
 
   

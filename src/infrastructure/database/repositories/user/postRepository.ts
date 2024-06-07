@@ -5,6 +5,8 @@ import LikesModel from "../../models/likesModel";
 import PostModel from "../../models/postModel";
 import CommentsModel from "../../models/commentsModel";
 import CommentInterface from "../../../../domain/entities/comments";
+import PostInterface from "../../../../domain/entities/post";
+import ReportModel from "../../models/reportModel";
 class PostRepository implements PostRepositoryInterface {
 
     async createPost(postData:any):Promise<any> {
@@ -21,8 +23,22 @@ class PostRepository implements PostRepositoryInterface {
             return {message: 'something went wrong',success:false}
         }
     } 
+    async findPostById(postId:string){
+        try {
+            console.log("getpostby id worked",postId) 
+          
+            const postData = await PostModel.findById(postId)
+            if(postData)
+                return {success:true,data:postData}
+            return {success:false,message:"Post not available"}
+           
+        } catch (error) {
+            console.log(error)
+            return {message: 'something went wrong',success:false}
+        }
+    } 
     
-    async getAllPosts():Promise<any> {
+    async getAllPosts() {
         try {
             console.log("get all post worked in repo :") 
           
@@ -62,8 +78,30 @@ class PostRepository implements PostRepositoryInterface {
                 preserveNullAndEmptyArrays: true
               }
             },
-         
+            {
+                $sort: {
+                  creationTime: -1 
+                }
+              }
           ]);
+            if(postData)
+                return {success:true,data:postData}
+            return {success:false,message:"Something went wrong"}
+           
+        } catch (error) {
+            console.log(error)
+            return {message: 'something went wrong',success:false}
+        }
+    } 
+
+    async getPostById(postId : string) {
+        try {
+            console.log("get all post worked in repo :",postId) 
+          
+        //    const postData = await PostModel.find({isBlocked:false,isDeleted:false}).sort({ creationTime: -1 });
+       
+        const postData = await PostModel.findById(postId)
+        console.log('postdata :',postData)
             if(postData)
                 return {success:true,data:postData}
             return {success:false,message:"Something went wrong"}
@@ -76,7 +114,6 @@ class PostRepository implements PostRepositoryInterface {
 
     async getUserPosts(userId : string):Promise<any> {
         try {
-            console.log("get user postss worked in repo :") 
           
            const postData = await PostModel.find({userId,isBlocked:false,isDeleted:false})
             if(postData)
@@ -167,6 +204,31 @@ class PostRepository implements PostRepositoryInterface {
         }
     }
 
+    async reportPost(postId : string,userId:string,reason:string):Promise<any> {
+        try {
+        const newReport = new ReportModel({postId,userId,reason})
+        if(await newReport.save())
+            return {success:true,data:newReport}
+        return {success:false,message:"Something went wrong"}
+           
+        } catch (error) {
+            console.log(error)
+            return {message: 'something went wrong',success:false}
+        }
+    }
+    async deletePost(postId : string):Promise<any> {
+        try {
+            const deletePost = await ReportModel.findByIdAndUpdate(postId, { isDeleted: true });
+            if (deletePost) {
+                return { success: true };
+            }
+        return {success:false,message:"Something went wrong"}
+           
+        } catch (error) {
+            console.log(error)
+            return {message: 'something went wrong',success:false}
+        }
+    }
   
 
 

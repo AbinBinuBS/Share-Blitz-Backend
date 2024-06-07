@@ -27,6 +27,8 @@ router.get('/getUserPosts',userAuth, (req :CustomRequest, res ) => { controller.
 router.post('/likePost',userAuth, (req, res) => { controller.likePost(req, res) });
 router.delete('/unlikePost',userAuth, (req, res) => { controller.unlikePost(req, res) });
 router.post('/commentOnPost',userAuth, (req, res) => { controller.commentOnPost(req, res) });
+router.post('/reportPost',userAuth, (req, res) => { controller.reportPost(req, res) });
+router.patch('/blockPost',userAuth, (req, res) => { controller.blockPost(req, res) });
 
 
 

@@ -39,12 +39,7 @@ class UserRepository implements IUserRepository {
   
             console.log("create user worked in repo :",data) 
             const {otp} = data
-            // const existUser = await UserModel.findOne({userName:userName,email:email})
-            // if(existUser) {
-            //     return {duplicate : true , success:true}
-            // } 
-            // const newUser = new UserModel(user)
-            // await newUser.save()
+            
             return {duplicate : false,success:true}
            
         } catch (error) {
@@ -165,6 +160,25 @@ class UserRepository implements IUserRepository {
         return {success:true , data:!userExists}
        return {success:true , message:"Failed to change status"}
 
+      } else {
+        return {success:false ,message:"User not found"}
+      }
+    } catch (error) {
+      console.log(error);
+      return {success:false , message:"Something went wrong"}
+    }
+  }
+  async searchUser(searchInput : string) :Promise<any> {
+    try {
+      
+      const userExists = await UserModel.find({
+        $or: [
+            { name: { $regex: searchInput, $options: 'i' } },
+            { userName: { $regex: searchInput, $options: 'i' } },
+        ]
+    });
+      if (userExists) {
+        return {success:true , data:userExists}
       } else {
         return {success:false ,message:"User not found"}
       }

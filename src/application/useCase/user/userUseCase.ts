@@ -143,6 +143,7 @@ class UserUseCase {
         try {
             const { email ,password} = loginData
             const findUser : UserI = await this.userRepository.findByEmail(email)
+            console.log(findUser)
             if(findUser){
                 if (findUser.loginType !== UserLoginType.EMAIL_PASSWORD) {
                    return { success:false,
@@ -164,13 +165,11 @@ class UserUseCase {
                  if (findUser.isBlocked){
                     return {success:false,message:"User is temporarily Blocked"}
                 } 
-                    // let token = this.jwtToken.createJwt(findUser._id,"USER");
                   let token =  jwt.sign(
-                        {userId: findUser._id,role:'USER'},
+                        {userId: findUser._id,role:findUser.role},
                         process.env.JWT_KEY as string,
                         { expiresIn: "60m" } 
                       );
-                    // console.log('login usecase toekn :',token)
                     const verify = this.jwtToken.verifyJwt(token)
                     // console.log('verigiree usecase dataa',verify)
                     const loggedUserData = await this.userRepository.getUserById(findUser._id as string)

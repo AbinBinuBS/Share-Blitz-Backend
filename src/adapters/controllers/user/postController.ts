@@ -39,15 +39,30 @@ class postController {
         }
     }
 
+    async getPostById (req: Request ,res : Response) {
+        try {
+            console.log('get all Post worked')
+            console.log(req.query)
+            const {postId} = req.query
+            const getPost = await this.postUseCase.getPostById(postId)
+            if(getPost.success){
+                return res.status(200).json({success:true,postData:getPost.postData})
+            }
+            return res.status(200).json({success:false ,message:"Failed to create the post !!"})
+        } catch (error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
     async getUserPosts (req : CustomRequest ,res:Response) {
         try {
-            console.log("Edit profile worked in controller")
-            console.log(req?.userId)
-            console.log(req.query)
+            console.log("get users posts worked in controller")
+           
 
-            const userId = req.userId
+            const userId = req.query.userId
             const getUserPosts = await this.postUseCase.getUserPosts(userId as string)
-            console.log('response get all posts profile :',getUserPosts)
+            console.log(getUserPosts)
             if(getUserPosts?.success){
             return res.status(200).json({success:true,userPosts:getUserPosts.data})
             }
@@ -130,6 +145,62 @@ class postController {
             console.log(error)
         }
     }
+
+    async reportPost (req : CustomRequest ,res:Response) {
+        try {
+            console.log("report post worked in controller")
+            console.log(req?.userId)
+            console.log(req.body) 
+            const{postId ,reason} = req.body
+            const userId = req.userId
+            if(!postId || !userId){
+                return res.status(400).json({ success: false, message: "Missing postId or userId" });
+            }
+            if(!reason || reason.trim().length <= 0 ){
+                return res.status(400).json({ success: false, message: "Please provide a reason" });
+            }
+
+            const reportPost = await this.postUseCase.reportPost(postId as string , userId as string,reason as string)
+            console.log('response report post contoller :',reportPost)
+            if(reportPost?.success){
+               return res.status(200).json({success:true,reportData:reportPost.data})
+            }
+            return res.status(200).json({success:false,message:reportPost?.message})
+            
+    
+        } catch(error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async blockPost (req : CustomRequest ,res:Response) {
+        try {
+            console.log("block post worked in controller")
+            console.log(req?.userId)
+            console.log(req.body) 
+            const{postId } = req.body
+            const userId = req.userId
+            if(!postId || !userId){
+                return res.status(400).json({ success: false, message: "Missing postId or userId" });
+            }
+           
+
+            const blockPost = await this.postUseCase.blockPost(postId as string , userId as string)
+            console.log('response block post controller :',blockPost)
+            if(blockPost?.success){
+               return res.status(200).json({success:true,blockData:blockPost.data})
+            }
+            return res.status(200).json({success:false,message:blockPost?.message})
+            
+    
+        } catch(error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    
    
 }
 export default postController 

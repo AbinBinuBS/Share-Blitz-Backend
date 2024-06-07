@@ -5,20 +5,26 @@ import PostRepositoryInterface from "../../../domain/interface/repositories/user
 import UserRepositoryInterface, { getAllUsersInterface, toogleStatusInterface } from "../../../domain/interface/repositories/user/userRepositoryInterface";
 import HashPasswordInterface from "../../../domain/interface/helpers/hashPasswordInterface";
 import { GUserData } from "../../../domain/interface/repositories/user/userRepositoryInterface";
-class AdminUseCase {
+import { adminUseCaseInterface } from "../interface/admin/adminUseCaseInteface";
+import ReportRepositoryInterface from "../../../domain/interface/repositories/user/ReportRepositoryInterface";
+class AdminUseCase implements adminUseCaseInterface {
     private postRepository: PostRepositoryInterface;
     private userRepository: UserRepositoryInterface;
+    private reportRepository: ReportRepositoryInterface;
+    
     private jwtToken : IJwtToken
     private hashPassword :HashPasswordInterface
 
     constructor(
         postRepository: PostRepositoryInterface,
         userRepository: UserRepositoryInterface,
+        reportRepository: ReportRepositoryInterface,
         jwtToken :IJwtToken,
         hashedPassword:HashPasswordInterface
     )  {
         this.postRepository =postRepository;
         this.userRepository = userRepository;
+        this.reportRepository = reportRepository;
         this.jwtToken = jwtToken;
         this.hashPassword = hashedPassword;
     }
@@ -36,7 +42,18 @@ class AdminUseCase {
          console.log(error) 
         }
      }
-
+     async getAllReportedPosts()  {
+        try {
+            console.log("worked get all users usecase")
+             const post : getAllUsersInterface = await this.reportRepository.getAllReportedPosts()
+             if(post.success){
+                 return {success:true,data:post.data}
+             } 
+             return {success:false,message:post?.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
     
      async toogleUserStatus(userId:string)  {
         try {
@@ -51,7 +68,56 @@ class AdminUseCase {
         }
      }
 
- 
+     async getPostById( postId : string )  {
+        try {
+             const post = await this.postRepository.getPostById( postId)
+             if(post.success){
+                 return {success:true,postData:post.data}
+             }
+             return {success:false,message:"Something went wrong"}
+        } catch (error) {
+         console.log(error)
+        }
+     }
+     async getUser(userId:string)  {
+        try {
+
+            const userExists = await this.userRepository.getUserById(userId)
+            if(!userExists)
+                return {success : false,message:'user not exists'}
+         
+             return {success:true ,user:userExists}
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async deletePost(postId:string)  {
+        try {
+
+            const deletePost = await this.postRepository.deletePost(postId)
+            if(!deletePost)
+                return {success : false,message:'Failed to delete the post'}
+         
+             return {success:true }
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async changeActionStatus(reportId:string)  {
+        try {
+            console.log("worked chnge action  status usecase")
+             const changeStatus  = await this.reportRepository.changeActionStatus(reportId)
+             if(changeStatus.success){
+                 return {success:true,updatedStatus:changeStatus.data}
+             } 
+             return {success:false,message:changeStatus?.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
+
 
 }
 

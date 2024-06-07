@@ -15,6 +15,7 @@ interface UserRepositoryInterface {
     toogleStatus(userId:string) : Promise<toogleStatusInterface>
     updateUserProfile(userId:string,userData:EditProfileUserDataInterface) : Promise<any>
     savePost(userId:string,postId:string) :Promise<any>
+    searchUser(searchInput:string) : Promise<any>
 } 
 export default UserRepositoryInterface 
 

@@ -24,10 +24,11 @@ const controller = new userController(connectionUseCase)
 
 const router = express.Router()
 
-// router.post('/createUser', (req, res) => {controller.createUser(req, res) });
-// router.post('/createpost', userAuth, (req, res) => {controller.createPost(req, res) });
-// router.get('/getAllPosts',userAuth, (req, res) => { controller.getAllPosts(req, res) });
-router.post('/followUser',userAuth, (req, res) => { controller.followUser(req, res) });
 
+router.post('/followUser',userAuth, (req, res) => { controller.followUser(req, res) });
+router.delete('/unFollowUser',userAuth, (req, res) => { controller.unFollowUser(req, res) });
+router.get('/getConnections',userAuth, (req, res) => { controller.getConnections(req, res) });
+router.get('/checkIsFriend',userAuth, (req, res) => { controller.checkIsFriend(req, res) });
+router.get('/searchUser',userAuth, (req, res) => { controller.searchUser(req, res) });
 
 export default router  

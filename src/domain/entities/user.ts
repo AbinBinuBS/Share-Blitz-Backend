@@ -30,6 +30,7 @@ export default interface UserI {
     location:string
     loginType:UserLoginT
     isVerified:Boolean
+    isPrivate:Boolean
     isBlocked:Boolean
     isDeleted:Boolean
     creationTime:Date

@@ -70,6 +70,10 @@ const userSchema:Schema<UserI>=new Schema({
         type:String,
         required:false,
     },
+    isPrivate:{
+        type:Boolean,
+        default:false
+    },
     isVerified:{
         type:Boolean,
         default:false

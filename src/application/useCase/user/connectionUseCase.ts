@@ -48,6 +48,72 @@ class ConnectionUseCase {
        }
     }
 
+    async unFollowUser(userId : string,targetUserId : string)  {
+        try {
+             console.log("unfollow user usecase worked ",userId,targetUserId)
+             const userConnection = await this.connectionRepository.findConnectionsById(userId );
+             console.log("user connection :",userConnection.data)
+             if (userConnection && userConnection.data.followings.some((users: { userId: string }) => users.userId == targetUserId)) {
+                const removeFollowing = await this.connectionRepository.removeFollowingById(userId,targetUserId)
+                const removeFollower = await this.connectionRepository.removeFollowerById(targetUserId,userId)
+                if(removeFollower.success && removeFollowing.success){
+                    return {success:true}
+                }
+                return { success: false, message: removeFollower?.message || removeFollowing?.message};
+             }
+            
+             return {success:false,message:"You are not a friend"}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+    async getConnections(userId : string)  {
+        try {
+             console.log("get connections usecase worked ",userId)
+             const userConnection = await this.connectionRepository.findConnectionsById(userId );
+             console.log("user connection :",userConnection.data)
+
+             if(userConnection.success){
+                 console.log("........sucess")
+                 return {success:true,data:userConnection.data}
+             } 
+             return {success:false,message:userConnection?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+
+     async checkIsFriend(userId : string,targetUserId:string)  {
+        try {
+             console.log("get connections usecase worked ",userId)
+             const userConnection = await this.connectionRepository.findConnectionsById(userId );
+             console.log("user connection :",userConnection.data)
+             if(userConnection.success){
+             const isFriend = userConnection?.data?.followings.some((user: {userId : string})=>user.userId === targetUserId)
+                console.log('............isFriemd',isFriend)
+   
+                 return {success:true,isFriend:isFriend}
+             } 
+             return {success:false,message:userConnection?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+
+     async searchUser(searchInput : string)  {
+        try {
+             console.log("search  usecase worked ",searchInput)
+             const searchUser = await this.userRepository.searchUser(searchInput );
+             console.log("user connection :",searchUser.data)
+             if(searchUser.success){
+                 return {success:true,data:searchUser.data}
+             } 
+             return {success:false,message:searchUser?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+
    
 
      

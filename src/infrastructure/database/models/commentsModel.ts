@@ -11,7 +11,7 @@ const CommentsSchema:Schema<CommentsInterface>=new Schema<CommentsInterface>({
    comments:[{
     userId:{type:String,ref:'UserModel',required:true},
     comment:{type:String,required:true},
-    createdAt:{type:Date,default:Date.now()}
+    createdAt:{type:Date,default:Date.now}
    }]
 });
 
