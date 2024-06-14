@@ -2,6 +2,10 @@ import mongoose, { Schema, Model } from "mongoose";
 import PostInterface  from "../../../domain/entities/post";
 import LikesModel from "./likesModel";
 import CommentsModel from "./commentsModel";
+const taggedUserSchema = new Schema({
+    userName: { type: String, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+});
 
 const PostSchema:Schema<PostInterface>=new Schema<PostInterface>({
     userId: {
@@ -16,6 +20,10 @@ const PostSchema:Schema<PostInterface>=new Schema<PostInterface>({
         type:[String],
         required: true
     },
+    taggedUsers:{
+      type: [taggedUserSchema],
+      required: false
+  },
     imageUrl:{
         type:String,
         required:false,
@@ -38,25 +46,25 @@ const PostSchema:Schema<PostInterface>=new Schema<PostInterface>({
     }
 });
 
-PostSchema.post("save", async function (post, next) {
 
-    const likes = await LikesModel.findOne({postId:post._id})
-    const comments = await CommentsModel.findOne({postId:post._id})
-  
-    // Setup necessary ecommerce models for the user
-    if (!likes) {
-      await LikesModel.create({
-        postId: post._id,
-        likes:[]
-      });
+PostSchema.post("save", async function (post, next) {
+  try {
+    // Using Promise.all to run both async operations concurrently
+        await Promise.all([
+            LikesModel.findOneAndUpdate(
+                { postId: post._id },
+                { $setOnInsert: { postId: post._id, likes: [] } },
+                { upsert: true, new: true }
+            ),
+            CommentsModel.findOneAndUpdate(
+                { postId: post._id },
+                { $setOnInsert: { postId: post._id, comments: [] } },
+                { upsert: true, new: true }
+            )
+        ]);
+    } catch (error) {
+        return ;
     }
-    if (!comments) {
-      await CommentsModel.create({
-        postId: post._id,
-        comments: [],
-      });
-    }
-  
     next();
   });
 

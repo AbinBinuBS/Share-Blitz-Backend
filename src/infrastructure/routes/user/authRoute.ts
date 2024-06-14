@@ -9,11 +9,13 @@ import JWTtoken from "../../utils/helpers/jwtToken"
 import hashPassword from "../../utils/helpers/hashPassword"
 import { RequestWithUserId } from "../../../domain/interface/controllers/userControllerInterface"
 import userAuth from "../../middleware/authMiddleware"
-const repository = new userRepository()
+import VerificationRepository from "../../database/repositories/user/verificationRepository"
+const userRepo = new userRepository()
+const verificationRepo = new VerificationRepository()
 const jwt = new JWTtoken
 const hashedPassword = new hashPassword()
 
-const userCase = new UserUseCase(repository,jwt,hashedPassword)
+const userCase = new UserUseCase(userRepo,verificationRepo,jwt,hashedPassword)
 const controller = new userController(userCase)
 
 const router = express.Router()

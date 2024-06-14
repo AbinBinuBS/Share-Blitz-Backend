@@ -7,4 +7,6 @@ export interface adminUseCaseInterface {
     getUser(userId :  string) : Promise<any>
     deletePost(postId : string) : Promise<any>
     changeActionStatus(reportId : string) : Promise<any>
+    getVerificationData(): Promise<any>
+    approveVerificationRequest(id:string) :Promise<any>
 }

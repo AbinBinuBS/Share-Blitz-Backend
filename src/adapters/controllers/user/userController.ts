@@ -1,12 +1,15 @@
 import { Request , Response} from 'express'
 import { postRequestI } from '../../../application/useCase/interface/user/postUseCase';
 import { CustomRequest } from '../../../domain/interface/controllers/userControllerInterface';
+import UserUseCase from '../../../application/useCase/user/userUseCase';
 
 class connectionController {
     private connectionUseCase : any 
+    private userUseCase : any 
 
-    constructor(connectionUseCase : any ){
+    constructor(connectionUseCase : any,userUseCase:any ){
         this.connectionUseCase = connectionUseCase;
+        this.userUseCase = userUseCase
        
     } 
 
@@ -105,6 +108,91 @@ class connectionController {
                     return res.status(200).json({success:true,users:searchUser.data})
             } else {
                 return res.status(409).json({success:false,message:searchUser?.message})
+            }
+        } catch (error ){
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async changePrivacy (req:CustomRequest ,res:Response) {
+        try {
+            // const userId = req.userId
+            console.log("changePrivacy worked")
+        
+            const userId = req?.userId
+            if(!userId ) 
+                return res.status(409).json({success:false,message:"UserId is required"})
+            const chaneStatus = await this.userUseCase.changePrivacy(userId as string )
+            if(chaneStatus.success){
+                    return res.status(200).json({success:true,userData:chaneStatus.data})
+            } else {
+                return res.status(409).json({success:false,message:chaneStatus?.message})
+            }
+        } catch (error ){
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async isRequestedVerification (req:CustomRequest ,res:Response) {
+        try {
+            // const userId = req.userId
+            console.log("is requested verification worked")
+        
+            const userId = req?.userId
+            if(!userId ) 
+                return res.status(409).json({success:false,message:"UserId is required"})
+            const isRequested = await this.userUseCase.isRequestedVerification(userId as string )
+            if(isRequested.success){
+                    return res.status(200).json({success:true,verificationStatus:isRequested.verificationStatus,verificationData:isRequested.data})
+            } else {
+                return res.status(200).json({success:false,verificationStatus:isRequested.verificationStatus,message:isRequested?.message})
+            }
+        } catch (error ){
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async submitVerification (req:CustomRequest ,res:Response) {
+        try {
+            // const userId = req.userId
+            console.log("submit verification worked")
+            console.log(req.body)
+            const {idUrl} = req.body
+            const userId = req?.userId
+            if(!userId ) 
+                return res.status(409).json({success:false,message:"UserId is required"})
+            const chaneStatus = await this.userUseCase.submitVerification(userId as string ,idUrl)
+            if(chaneStatus.success){
+                    return res.status(200).json({success:true,userData:chaneStatus.data})
+            } else {
+                return res.status(409).json({success:false,message:chaneStatus?.message})
+            }
+        } catch (error ){
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async updatePaymentDetails (req:CustomRequest ,res:Response) {
+        try {
+            // const userId = req.userId
+            console.log("update payment details worked")
+            console.log(req.body)
+            const {plan,paymentId} = req.body
+            const userId = req?.userId
+            if(!userId ) 
+                return res.status(409).json({success:false,message:"UserId is required"})
+            if(!plan || !paymentId ) 
+                return res.status(409).json({success:false,message:"plan && payment id is required"})
+          
+            const updatePayment = await this.userUseCase.updatePaymentDetails(userId as string ,plan)
+            if(updatePayment.success){
+                    return res.status(200).json({success:true,userData:updatePayment.data})
+            } else {
+                return res.status(409).json({success:false,message:updatePayment?.message})
             }
         } catch (error ){
             res.status(500).send('Something went wrong')

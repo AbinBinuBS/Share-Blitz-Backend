@@ -32,9 +32,30 @@ class PostUseCase {
        }
     }
 
-    async getAllPosts()  {
+    async editPost(postId:string,postData:any)  {
         try {
-             const post = await this.postRepository.getAllPosts()
+           
+            if(!postId)
+                return {success:false,message:"Post Id is required"}
+             const findPost = await this.postRepository.findPostById(postId)
+             if(!findPost.success)
+                 return {success:false,message:"Post not found"}
+             const editPost = await this.postRepository.editPost(postId,postData)
+             if(editPost.success) {
+                return {success:true,data:editPost.data}
+             }
+             return {success:false,message:"Failed to update the post"}
+
+        } catch (error) {
+         console.log(error)
+        }
+     }
+
+    async getAllPosts(page:string,limit : string)  {
+        try {
+            const skip = parseInt(limit) * (parseInt(page) -1)
+            const end = parseInt(limit)
+             const post = await this.postRepository.getAllPosts(skip,end)
              if(post.success){
                  return {success:true,postData:post.data}
              }
@@ -72,7 +93,7 @@ class PostUseCase {
         try {
             console.log("like post in usecase")
              const post = await this.postRepository.findPostLikesByPostId(postId)
-             console.log('Like :',post)
+            //  console.log('Like :',post)
              if(!post.success){
                  return {success:false,message: "Like collection not found"}
              }
@@ -135,6 +156,37 @@ class PostUseCase {
         } 
      }
 
+     async addReply(userId : string ,postId:string,commentId:string, reply : string)  {
+        try {
+        
+           
+
+            const addReply :CommentOnPostResponse =  await this.postRepository.addReply(userId,postId,commentId,reply)
+            if(!addReply.success){
+                return {success:false,message:addReply.message}
+            }
+
+            return {success:true,data:addReply.data}
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     
+     async getReplies(postId:string,commentId:string)  {
+        try {
+        
+            const addReply :CommentOnPostResponse =  await this.postRepository.getReplies(postId,commentId)
+            if(!addReply.success){
+                return {success:false,message:addReply.message}
+            }
+
+            return {success:true,data:addReply.data}
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
      async reportPost(postId : string ,userId:string, reason : string)  {
         try {
             console.log("comment post in usecase")
@@ -175,6 +227,113 @@ class PostUseCase {
         } 
      }
 
+     async savePost(userId:string,postId : string)  {
+        try {
+            console.log("save post in usecase")
+            const savedPosts = await this.postRepository.findSavedPostsById(userId);
+            if (savedPosts && savedPosts.success && savedPosts.data?.savedPosts.some((post: { postId : any }) => post.postId.toString() == postId)) {
+              console.log("User already saved the post");
+              return { success: false, message: "User already saved the post" };
+            }
+             const savePost = await this.postRepository.savePost(userId,postId)
+             if(!savePost.success){
+                 return {success:false,message: savePost?.message}
+             }
+
+             return {success:true,data:savePost.data}
+          
+
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async unSavePost(userId:string,postId : string)  {
+        try {
+            console.log("un save post in usecase");
+            
+            const savedPosts = await this.postRepository.findSavedPostsById(userId);
+            
+            if (!savedPosts.success) {
+                return { success: false, message: "Failed to retrieve saved posts" };
+            }
+    
+            if (!savedPosts.data?.savedPosts.some((post: { postId: any }) => post.postId.toString() === postId)) {
+                console.log("Post is not saved by the user");
+                return { success: false, message: "Post is not saved by the user" };
+            }
+    
+            const unSavePost = await this.postRepository.unSavePost(userId, postId);
+            
+            if (!unSavePost.success) {
+                return { success: false, message: unSavePost.message };
+            }
+    
+            return { success: true, data: unSavePost.data };
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+
+     async getSavedPostsById(userId:string)  {
+        try {
+            console.log("save post in usecase")
+            const savedPosts = await this.postRepository.findSavedPostsById(userId);
+            if (!savedPosts.success ) {
+              return { success: false, message: "Failed to load savedPosts" };
+            }
+           
+
+             return {success:true,data:savedPosts.data}
+          
+
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async deleteComment(postId:string,commentId:string)  {
+        try {
+            console.log("delete comment in usecase")
+            const deleteComment = await this.postRepository.deleteComment(postId,commentId);
+            if (!deleteComment.success ) {
+              return { success: false, message: "Failed to load deleteComment" };
+            }
+           
+
+             return {success:true,data:deleteComment.data}
+          
+
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async getTaggedPosts(userId:string,)  {
+        try {
+            const taggedUsers = await this.postRepository.getTaggedPosts(userId);
+            if (!taggedUsers.success ) {
+              return { success: false, message: "Failed to load tagged posts" };
+            }
+             return {success:true,data:taggedUsers.data}
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async deletePost(postId:string)  {
+        try {
+
+            const deletePost = await this.postRepository.deletePost(postId)
+            if(!deletePost)
+                return {success : false,message:'Failed to delete the post'}
+         
+             return {success:true,data:deletePost.data }
+        } catch (error) {
+         console.log(error)
+        } 
+     }
      
 
  

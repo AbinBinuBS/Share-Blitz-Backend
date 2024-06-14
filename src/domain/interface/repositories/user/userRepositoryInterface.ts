@@ -16,6 +16,8 @@ interface UserRepositoryInterface {
     updateUserProfile(userId:string,userData:EditProfileUserDataInterface) : Promise<any>
     savePost(userId:string,postId:string) :Promise<any>
     searchUser(searchInput:string) : Promise<any>
+    changePrivacy(userId:string) : Promise<any>
+    toogleIsVerified(userId:string) : Promise<any>
 } 
 export default UserRepositoryInterface 
 

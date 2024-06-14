@@ -31,7 +31,7 @@ class ConnectionUseCase {
        try {
             console.log("follow user usecase worked ",userId,targetUserId)
             const userConnection = await this.connectionRepository.findConnectionsById(userId );
-            console.log("user connection :",userConnection.data)
+            // console.log("user connection :",userConnection.data)
             if (userConnection && userConnection.data.followings.some((users: { userId: string }) => users.userId == targetUserId)) {
                 console.log("User already follows the target user")
                 return { success: false, message: "User already follows the target user" };
@@ -52,7 +52,7 @@ class ConnectionUseCase {
         try {
              console.log("unfollow user usecase worked ",userId,targetUserId)
              const userConnection = await this.connectionRepository.findConnectionsById(userId );
-             console.log("user connection :",userConnection.data)
+            //  console.log("user connection :",userConnection.data)
              if (userConnection && userConnection.data.followings.some((users: { userId: string }) => users.userId == targetUserId)) {
                 const removeFollowing = await this.connectionRepository.removeFollowingById(userId,targetUserId)
                 const removeFollower = await this.connectionRepository.removeFollowerById(targetUserId,userId)
@@ -71,7 +71,7 @@ class ConnectionUseCase {
         try {
              console.log("get connections usecase worked ",userId)
              const userConnection = await this.connectionRepository.findConnectionsById(userId );
-             console.log("user connection :",userConnection.data)
+            //  console.log("user connection :",userConnection.data)
 
              if(userConnection.success){
                  console.log("........sucess")
@@ -87,7 +87,7 @@ class ConnectionUseCase {
         try {
              console.log("get connections usecase worked ",userId)
              const userConnection = await this.connectionRepository.findConnectionsById(userId );
-             console.log("user connection :",userConnection.data)
+            //  console.log("user connection :",userConnection.data)
              if(userConnection.success){
              const isFriend = userConnection?.data?.followings.some((user: {userId : string})=>user.userId === targetUserId)
                 console.log('............isFriemd',isFriend)
@@ -104,7 +104,7 @@ class ConnectionUseCase {
         try {
              console.log("search  usecase worked ",searchInput)
              const searchUser = await this.userRepository.searchUser(searchInput );
-             console.log("user connection :",searchUser.data)
+            //  console.log("user connection :",searchUser.data)
              if(searchUser.success){
                  return {success:true,data:searchUser.data}
              } 

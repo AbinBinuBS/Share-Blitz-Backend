@@ -28,7 +28,7 @@ class ReportRepository implements ReportRepositoryInterface {
         try {
             console.log(" change action status worked in repo :") 
             
-            const result = await ReportModel.findByIdAndUpdate(reportId,{actionTaken:true})
+            const result = await ReportModel.findByIdAndUpdate(reportId,{actionTaken:true},{new:true})
         
             console.log("result ",result)
             if(result)

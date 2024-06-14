@@ -160,6 +160,7 @@ class userController {
             console.log(req.body)
             const {email} = req.body
             const user = await this.userCase.Glogin( email);
+            console.log('send dat g login;',user)
             if(user?.success){
                 res.cookie("userToken", user.token, {
                     expires: new Date(Date.now() + 25892000000),

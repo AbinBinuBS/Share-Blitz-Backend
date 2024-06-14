@@ -187,6 +187,43 @@ class UserRepository implements IUserRepository {
       return {success:false , message:"Something went wrong"}
     }
   }
+
+  async changePrivacy (userId : string) {
+    const user = await UserModel.findById(userId);
+        
+        if (!user) {
+            // throw new Error("User not found");
+        return { success: false, message:"User not exist" };
+
+        }
+
+        // Toggle the isPrivate field
+        user.isPrivate = !user.isPrivate;
+
+        // Save the updated user
+        await user.save();
+
+        return { success: true, data: { isPrivate: user.isPrivate } };
+  }
+
+  async toogleIsVerified (userId : string) {
+    try {
+      // Find the user by userId
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+          return { success: false, message: "User not found" };
+      }
+      user.isVerified = !user.isVerified;
+
+      await user.save();
+
+      return { success: true, data: user };
+  } catch (error) {
+      console.log(error);
+      return { success: false, message: "Failed to toggle isVerified" };
+  }
+  }
 }
 
 export default UserRepository

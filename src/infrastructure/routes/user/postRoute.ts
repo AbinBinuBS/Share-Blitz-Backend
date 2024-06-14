@@ -20,13 +20,28 @@ const router = express.Router()
 // router.post('/createUser', (req, res) => {controller.createUser(req, res) });
 router.post('/createpost', userAuth, (req, res) => {controller.createPost(req, res) });
 router.get('/getAllPosts',userAuth, (req , res) => { controller.getAllPosts(req, res) });
+router.get('/getPostById',userAuth, (req , res) => { controller.getPostById(req, res) });
+router.delete('/deletePost',userAuth, (req, res) => { controller.deletePost(req, res) });
+
+router.get('/getCommentReplys',userAuth, (req , res) => { controller.getCommentReplys(req, res) });
+router.post('/replyToComment',userAuth, (req , res) => { controller.addReply(req, res) });
+router.post('/commentOnPost',userAuth, (req, res) => { controller.commentOnPost(req, res) });
+router.delete('/deleteComment',userAuth, (req, res) => { controller.deleteComment(req, res) });
+
 
 router.get('/getUserPosts',userAuth, (req :CustomRequest, res ) => { controller.getUserPosts(req, res) });
-// router.patch('/savePost',userAuth, (req :CustomRequest, res ) => { controller.savePost(req, res) });
+router.patch('/editPost',userAuth, (req :CustomRequest, res ) => { controller.editPost(req, res) });
 
 router.post('/likePost',userAuth, (req, res) => { controller.likePost(req, res) });
 router.delete('/unlikePost',userAuth, (req, res) => { controller.unlikePost(req, res) });
-router.post('/commentOnPost',userAuth, (req, res) => { controller.commentOnPost(req, res) });
+
+router.get('/getSavedPosts',userAuth, (req :CustomRequest, res ) => { controller.getSavedPosts(req, res) });
+router.get('/getTaggedPosts',userAuth, (req :CustomRequest, res ) => { controller.getTaggedPosts(req, res) });
+
+router.post('/savePost',userAuth, (req, res) => { controller.savePost(req, res) });
+router.delete('/unSavePost',userAuth, (req, res) => { controller.unSavePost(req, res) });
+
+router.delete('/unSave',userAuth, (req, res) => { controller.unSavePost(req, res) });
 router.post('/reportPost',userAuth, (req, res) => { controller.reportPost(req, res) });
 router.patch('/blockPost',userAuth, (req, res) => { controller.blockPost(req, res) });
 

@@ -13,17 +13,21 @@ import HashPasswordInterface from "../../../domain/interface/helpers/hashPasswor
 import { GUserData } from "../../../domain/interface/repositories/user/userRepositoryInterface";
 import { EditProfileUserDataInterface } from "../../../domain/interface/controllers/userControllerInterface";
 import sendEmail from "../../../infrastructure/utils/helpers/NodeMailer";
+import { VerificationRepositoryInterface } from "../../../domain/interface/repositories/user/verificationRepositoryInterface";
 class UserUseCase {
     private userRepository: UserRepositoryInterface;
+    private verificationRepository :VerificationRepositoryInterface
     private jwtToken : IJwtToken
     private hashPassword :HashPasswordInterface
 
     constructor(
         userRepository: UserRepositoryInterface,
+        verificationRepository: VerificationRepositoryInterface,
         jwtToken :IJwtToken,
         hashedPassword:HashPasswordInterface
     )  {
         this.userRepository = userRepository;
+        this.verificationRepository = verificationRepository;
         this.jwtToken = jwtToken;
         this.hashPassword = hashedPassword;
     }
@@ -65,8 +69,7 @@ class UserUseCase {
              } else 
              return {success :false,message:'No token Try again!'}
             
-            //  const product = await this.userRepository.verifyOtp(otp)
-            //  return product
+            
         } catch (error) { 
          console.log(error)
         }
@@ -143,7 +146,7 @@ class UserUseCase {
         try {
             const { email ,password} = loginData
             const findUser : UserI = await this.userRepository.findByEmail(email)
-            console.log(findUser)
+            // console.log(findUser)
             if(findUser){
                 if (findUser.loginType !== UserLoginType.EMAIL_PASSWORD) {
                    return { success:false,
@@ -220,13 +223,21 @@ class UserUseCase {
 
                    };
                   }
-                let passwordMatch = await this.hashPassword.compare(email,findUser.password)
+                  const hashedPassword = await this.hashPassword.createHash(email.trim())
+console.log("......................................",findUser.password,email,hashedPassword)
+                let passwordMatch = await this.hashPassword.compare(email.trim(),findUser.password)
+                console.log('passsword match',passwordMatch)
                 if(!passwordMatch) { 
                     return {success:false,message:' Incorrect password'}
                 } else if (findUser.isBlocked){
                     return {success:false,message:"User is temporarily Blocked"}
                 } else {
-                    let token = this.jwtToken.createJwt(findUser._id,"user");
+                    // let token = this.jwtToken.createJwt(findUser._id,"user");
+                    let token =  jwt.sign(
+                        {userId: findUser._id,role:findUser.role},
+                        process.env.JWT_KEY as string,
+                        { expiresIn: "60m" } 
+                      );
                     const loggedUserData = await this.userRepository.getUserById(findUser._id as string)
                     console.log('user data to send ;',loggedUserData)
                     return {success:true,user:loggedUserData,token:token}
@@ -295,8 +306,75 @@ class UserUseCase {
 
         }
      }
+     async changePrivacy(userId:string )  {
+        try {
 
+        
+            const userExists = await this.userRepository.getUserById(userId) 
+            if(!userExists)
+                return {success : false,message:'user not exists'}
+            const updateUser = await this.userRepository.changePrivacy(userId) 
+            if(updateUser.success){
+            const userData = await this.userRepository.getUserById(userId) 
+                return {success:true,data:userData}
+            }
+             return {success:false ,messgage:updateUser.message}
+            
+        } catch (error) {
+         console.log(error)
+        } 
+     }
 
+     async isRequestedVerification(userId:string )  {
+        try {
+
+        
+            const userExists = await this.verificationRepository.getVerificationDetailsByUserId(userId) 
+            if(!userExists.success)
+                return {success : false,verificationStatus:false,message:'user not exists'}
+      
+            return {success:true,verificationStatus:true,data:userExists.data}
+
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async submitVerification(userId:string,idUrl:string )  {
+        try {
+
+        
+            const userExists = await this.verificationRepository.submitVerification(userId,idUrl) 
+            if(!userExists.success)
+                return {success : false,verificationStatus:false,message:'user not exists'}
+      
+            return {success:true,verificationStatus:true,data:userExists.data}
+
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
+     async updatePaymentDetails(userId:string,plan:string )  {
+        try {
+
+        
+            const requestExists = await this.verificationRepository.getVerificationDetailsByUserId(userId) 
+            if(!requestExists.success)
+                return {success : false,message:'Request not exists'}
+            const updatePayment = await this.verificationRepository.updatePayment(userId ,plan) 
+            if(!requestExists.success)
+                return {success : false,message:updatePayment?.message}
+            const changeUserToVerified = await this.userRepository.toogleIsVerified(userId)
+            if( !changeUserToVerified.success)
+                return {success:false,message:"Failed to update user is verified"}
+            return {success:true,data:changeUserToVerified.data}
+
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+     
 }
 
 export default UserUseCase

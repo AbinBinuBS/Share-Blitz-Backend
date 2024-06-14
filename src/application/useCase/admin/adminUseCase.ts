@@ -7,11 +7,12 @@ import HashPasswordInterface from "../../../domain/interface/helpers/hashPasswor
 import { GUserData } from "../../../domain/interface/repositories/user/userRepositoryInterface";
 import { adminUseCaseInterface } from "../interface/admin/adminUseCaseInteface";
 import ReportRepositoryInterface from "../../../domain/interface/repositories/user/ReportRepositoryInterface";
+import { VerificationRepositoryInterface } from "../../../domain/interface/repositories/user/verificationRepositoryInterface";
 class AdminUseCase implements adminUseCaseInterface {
     private postRepository: PostRepositoryInterface;
     private userRepository: UserRepositoryInterface;
     private reportRepository: ReportRepositoryInterface;
-    
+    private verificationRepository: VerificationRepositoryInterface;
     private jwtToken : IJwtToken
     private hashPassword :HashPasswordInterface
 
@@ -19,12 +20,14 @@ class AdminUseCase implements adminUseCaseInterface {
         postRepository: PostRepositoryInterface,
         userRepository: UserRepositoryInterface,
         reportRepository: ReportRepositoryInterface,
+        verificationRepository : VerificationRepositoryInterface,
         jwtToken :IJwtToken,
         hashedPassword:HashPasswordInterface
     )  {
         this.postRepository =postRepository;
         this.userRepository = userRepository;
         this.reportRepository = reportRepository;
+        this.verificationRepository = verificationRepository;
         this.jwtToken = jwtToken;
         this.hashPassword = hashedPassword;
     }
@@ -70,7 +73,7 @@ class AdminUseCase implements adminUseCaseInterface {
 
      async getPostById( postId : string )  {
         try {
-             const post = await this.postRepository.getPostById( postId)
+             const post = await this.postRepository.getPostById(postId)
              if(post.success){
                  return {success:true,postData:post.data}
              }
@@ -99,7 +102,7 @@ class AdminUseCase implements adminUseCaseInterface {
             if(!deletePost)
                 return {success : false,message:'Failed to delete the post'}
          
-             return {success:true }
+             return {success:true,data:deletePost.data }
         } catch (error) {
          console.log(error)
         } 
@@ -118,7 +121,32 @@ class AdminUseCase implements adminUseCaseInterface {
         }
      }
 
+     async getVerificationData()  {
+        try {
+            console.log("worked getVerificationData  usecase")
+             const changeStatus  = await this.verificationRepository.getVerificationData()
+             if(changeStatus.success){
+                 return {success:true,data:changeStatus.data}
+             } 
+             return {success:false,message:changeStatus?.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
 
+     async approveVerificationRequest(id:string)  {
+        try {
+             const approve  = await this.verificationRepository.approveVerificationRequest(id)
+             if(approve.success){
+                 return {success:true,data:approve.data}
+             } 
+             return {success:false,message:approve?.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
+     
+     
 }
 
 export default AdminUseCase

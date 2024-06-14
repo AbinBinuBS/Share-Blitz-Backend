@@ -5,6 +5,7 @@ export default interface PostInterface {
     imageUrl : string
     caption:string
     hashtags:string[]
+    taggedUsers: taggedUsersInterface[]
     isBlocked:Boolean
     like:number
     isDeleted:Boolean
@@ -15,4 +16,7 @@ export interface CreatePostRequestModel {
    imageUrl:string
    caption:string
    hashtags:string[]
+}
+export interface taggedUsersInterface {
+    userName:string,userId:mongoose.Schema.Types.ObjectId
 }

@@ -75,7 +75,7 @@ class adminController {
             if(getPost.success){
                 return res.status(200).json({success:true,postData:getPost.postData})
             }
-            return res.status(200).json({success:false ,message:"Failed to create the post !!"})
+            return res.status(200).json({success:false ,message:getPost?.message})
         } catch (error) {
             res.status(500).send('Something went wrong')
             console.log(error)
@@ -122,7 +122,7 @@ class adminController {
     }
     async deletePost (req: Request ,res : Response) {
         try {
-            console.log('delete post worked')
+            console.log('delete post worked...............')
             console.log(req.body)
             console.log(req.query)
             const {postId} = req.body
@@ -130,9 +130,9 @@ class adminController {
                 return res.status(200).json({success:false ,message:"postid is required"})
 
             const deletePost = await this.adminUseCase.deletePost(postId as string)
-            console.log('delete post :',deletePost)
+            // console.log('delete post :',deletePost)
             if(deletePost.success) {
-                return res.status(200).json({success:true,updateStatus:deletePost.updatedStatus})
+                return res.status(200).json({success:true,updateStatus:deletePost.data})
             }
           
             return res.status(200).json({success:false ,message:deletePost.message})
@@ -141,6 +141,44 @@ class adminController {
             console.log(error)
         }
     }
+
+    async getVerificationData (req: Request ,res : Response) {
+        try {
+           
+           
+
+            const getData = await this.adminUseCase.getVerificationData()
+            console.log('gt data :',getData)
+            if(getData.success) {
+                return res.status(200).json({success:true,verificationData:getData.data})
+            }
+          
+            return res.status(200).json({success:false ,message:getData.message})
+        } catch (error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async approveVerificationRequest (req: Request ,res : Response) {
+        try {
+           const {id} = req.body
+           if(!id )
+            return res.status(200).json({success:false ,message:"id is required"})
+
+            const getData = await this.adminUseCase.approveVerificationRequest(id as string)
+            console.log('gt data :',getData)
+            if(getData.success) {
+                return res.status(200).json({success:true,verifacationData:getData.data})
+            }
+          
+            return res.status(200).json({success:false ,message:getData.message})
+        } catch (error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+    
 
 }
 export default adminController 
