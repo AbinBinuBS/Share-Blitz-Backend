@@ -50,11 +50,13 @@ class postController {
             console.log('get all Post worked')
             console.log(req.query)
             const {limit,page} = req.query
+            if(!limit  || !page)
+                return res.status(400).json({success:false ,message:"Limit and page is required"})
             const getAllPosts = await this.postUseCase.getAllPosts(page,limit)
             if(getAllPosts.success){
                 return res.status(200).json({success:true,postData:getAllPosts.postData})
             }
-            return res.status(200).json({success:false ,message:"Failed to create the post !!"})
+            return res.status(200).json({success:false ,message:"Failed to get all post !!"})
         } catch (error) {
             res.status(500).send('Something went wrong')
             console.log(error)

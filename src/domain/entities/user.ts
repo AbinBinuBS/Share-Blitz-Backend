@@ -37,6 +37,9 @@ export default interface UserI {
     followings:IFollow[]
     followers:IFollow[]
     savedPost:savedPost[]
+    refreshToken:string
+    generateAccessToken(): Promise<string>;
+    generateRefreshToken(): Promise<string>;
 }
 export interface UserLogin {
     email:string

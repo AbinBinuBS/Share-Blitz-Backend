@@ -14,6 +14,8 @@ import { GUserData } from "../../../domain/interface/repositories/user/userRepos
 import { EditProfileUserDataInterface } from "../../../domain/interface/controllers/userControllerInterface";
 import sendEmail from "../../../infrastructure/utils/helpers/NodeMailer";
 import { VerificationRepositoryInterface } from "../../../domain/interface/repositories/user/verificationRepositoryInterface";
+import { generateAccessAndRefreshTokens } from "../../../domain/services/TokenGeneration";
+import ApiError from "../../../infrastructure/utils/handlers/ApiError";
 class UserUseCase {
     private userRepository: UserRepositoryInterface;
     private verificationRepository :VerificationRepositoryInterface
@@ -106,6 +108,8 @@ class UserUseCase {
         }
     }
 
+
+
     async resendOtp(userToken :string ): Promise<any> {
         try {
           
@@ -140,11 +144,74 @@ class UserUseCase {
         }
     }
 
+    async sendOtpToEmail(email:string ): Promise<any> {
+        try {  
+               const user = await this.userRepository.findByEmail(email)
+               if(!user)
+                return {success:false,message:"User not found"}
+            let otp =generateOTP()
+            console.log('generated otp ',otp)
+            const sendOtpToEmail = await sendEmail(email,otp)
+
+            const otpExpiration = new Date();
+                otpExpiration.setMinutes(otpExpiration.getMinutes() + 1);
+            let token = jwt.sign(
+                { otp ,otpExpiration},
+                process.env.JWT_KEY as string,
+                { expiresIn: "5m" }
+              );
+              console.log('token',token)
+              let decodeToken = this.jwtToken.verifyOtp(token)
+              console.log('decoded token',decodeToken)
+
+            if(!token)
+            return {success:false,message:"Failed to genereate otp"}
+            return {success:true,token:token}
+        } catch (error) {
+            console.log(error)
+        }
+    } 
+    
+    async verifyForgetPasswordOtp(userOtp:string,token:string ): Promise<any> {
+        try {     
+    
+              let decodedToken = this.jwtToken.verifyOtp(token)
+              console.log('decoded token',decodedToken)
+              if(decodedToken){
+                const { otp, otpExpiration } = decodedToken;
+                if (new Date() > new Date(otpExpiration)) {
+                    return {success :false,message:'  OTP Expired !'}
+                }
+                if( otp ==userOtp) {
+                    return {success:true,message : 'Otp verified Sucessfully'}
+                } else 
+                return {success :false,message:' Incorrect OTP !'}
+                 
+             } else 
+             return {success :false,message:'No token Try again!'}
+            
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    async verifyForgetPassword(email:string,password:string ): Promise<any> {
+        try {     
+            const hashedPassword = await this.hashPassword.createHash(password)
+            const changePassword = await this.userRepository.changePasswordByEmail(email,hashedPassword)
+            if(changePassword.success) {
+                return {success:true,message:'Password changed successfully'}
+            }
+            return {success:false,message:'Failed to change password'}
+  
+        } catch (error) {
+            console.log(error)
+        }
+    }
     
 
      async login (loginData:UserLogin) {
         try {
-            const { email ,password} = loginData
+            const { email,password} = loginData
             const findUser : UserI = await this.userRepository.findByEmail(email)
             // console.log(findUser)
             if(findUser){
@@ -168,21 +235,25 @@ class UserUseCase {
                  if (findUser.isBlocked){
                     return {success:false,message:"User is temporarily Blocked"}
                 } 
-                  let token =  jwt.sign(
-                        {userId: findUser._id,role:findUser.role},
-                        process.env.JWT_KEY as string,
-                        { expiresIn: "60m" } 
-                      );
-                    const verify = this.jwtToken.verifyJwt(token)
+                //   let token =  jwt.sign(
+                //         {userId: findUser._id,role:findUser.role},
+                //         process.env.JWT_KEY as string,
+                //         { expiresIn: "60m" } 
+                //       );
+                 const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(findUser._id)
+                
+                    // const verify = this.jwtToken.verifyJwt(token)
                     // console.log('verigiree usecase dataa',verify)
                     const loggedUserData = await this.userRepository.getUserById(findUser._id as string)
                     // console.log('user data to send ;',loggedUserData)
-                    return {success:true,user:loggedUserData,token:token}
+                    return {success:true,user:loggedUserData,accessToken,refreshToken}
                 
             }
             return {success:false,message:"User not found "}
         } catch (error) {
             console.log(error)
+            throw new ApiError(500," Something went wrong")
+
         }
     }
 

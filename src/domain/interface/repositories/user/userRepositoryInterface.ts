@@ -18,6 +18,7 @@ interface UserRepositoryInterface {
     searchUser(searchInput:string) : Promise<any>
     changePrivacy(userId:string) : Promise<any>
     toogleIsVerified(userId:string) : Promise<any>
+    changePasswordByEmail(email:string,passsword:string) : Promise<any>
 } 
 export default UserRepositoryInterface 
 

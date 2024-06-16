@@ -10,12 +10,25 @@ class JWTtoken implements IJwtToken{
         }
         throw new Error('JWT key is not defined')
     }
+    createJwtToken(userId: string, role: string,jwtKey:string,expiry:string): string {
+        
+        console.log('.............')
+
+            const token:string=jwt.sign({id:userId,role:role},jwtKey,{expiresIn:expiry})
+            const decode=jwt.verify(token,jwtKey) as JwtPayload  
+            console.log('created token :',token)
+            console.log("decoded data :",decode)
+            console.log('.............')
+
+            return token
+    
+    }
     verifyJwt(token: string): JwtPayload | null {
         try{
-            const jwtKey=process.env.JWT_KEY as string
-            console.log('env....',jwtKey)
-            console.log('env....',token)
+            const jwtKey=process.env.ACCESS_TOKEN_SECRET as string
+         
             const decode=jwt.verify(token,jwtKey) as JwtPayload  
+            console.log("decoed token in verifyjwt :",decode)
             return decode
         }catch(error){
             console.log(error)

@@ -11,6 +11,8 @@ import {UserWithoutCredential,GUserData,getAllUsersInterface} from "../../../../
 import { Otp, UserLogin, UserRequestModel } from "../../../../domain/entities/user";
 import UserModel from "../../models/userModel";
 import { EditProfileUserDataInterface } from '../../../../domain/interface/controllers/userControllerInterface';
+import ApiResponse from '../../../utils/handlers/ApiResponse';
+import ApiError from '../../../utils/handlers/ApiError';
 
 class UserRepository implements IUserRepository {
 
@@ -87,7 +89,7 @@ class UserRepository implements IUserRepository {
     
         
         const userData  = await UserModel.findById(userId).select(
-          "-password"
+          "-password -refreshToken"
         );
   
         return userData
@@ -219,6 +221,51 @@ class UserRepository implements IUserRepository {
       await user.save();
 
       return { success: true, data: user };
+  } catch (error) {
+      console.log(error);
+      return { success: false, message: "Failed to toggle isVerified" };
+  }
+  }
+
+  async changePasswordByEmail (email:string,passsword : string) {
+    try {
+      const user = await UserModel.findOneAndUpdate({email} , {$set:{password:passsword}});
+
+      if (!user) {
+          return { success: false, message: "Failed to change password" };
+      }
+	  return { success: true, message: "Password changed successfully " };
+
+  } catch (error) {
+      console.log(error);
+     throw new ApiError(400,"Failed to change password")
+  }
+  }
+
+  async logoutUSer (userId : string) {
+    try {
+    
+       await UserModel.findByIdAndUpdate(userId,
+        {
+          $set :{
+             refreshToken:undefined
+          }
+        },
+        {
+          new:true
+        }
+      );
+      const options = {
+        httpOnly:true,
+        secure:true
+    }
+    // return res.status(200)
+    // .clearCookie("accessToken",options)
+    // .clearCookie("refreshToken",options)
+    // .json(new ApiResponse(200,{},"User loggedOut successfully"))
+     
+
+      return { success: true, data: "" };
   } catch (error) {
       console.log(error);
       return { success: false, message: "Failed to toggle isVerified" };

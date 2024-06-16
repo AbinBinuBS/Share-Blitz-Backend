@@ -4,9 +4,12 @@ import { NextFunction } from "express"
 import { Request, Response, } from "express";
 import { UserRolesEnum } from "../constants/userConstants";
 import { UserWithoutCredential } from "../../domain/interface/repositories/user/userRepositoryInterface";
-import { JwtPayload } from "jsonwebtoken";
+import asyncHandlers from "../utils/handlers/asyncHandlers";
+import ApiError from "../utils/handlers/ApiError";
 const userRepository = new UserRepository()
 const jwt = new JWTtoken()
+import JWT,{JwtPayload} from 'jsonwebtoken'
+
 // import jwt,{JwtPayload} from 'jsonwebtoken'
 
 
@@ -15,7 +18,7 @@ interface CustomRequest extends Request {
     user?: UserWithoutCredential; 
 }
 
- const userAuth =  async (req: CustomRequest ,res: Response,next: NextFunction) => {
+ const userAuth1 =  async (req: CustomRequest ,res: Response,next: NextFunction) => {
    try {
     if(req.headers.authorization) {
         const token = req.headers.authorization
@@ -45,7 +48,7 @@ interface CustomRequest extends Request {
    }
 }
 
-export default userAuth
+// export default userAuth
 
 
 export const adminAuth = async (req: CustomRequest, res: Response, next: NextFunction) => {
@@ -79,7 +82,7 @@ export const adminAuth = async (req: CustomRequest, res: Response, next: NextFun
             return res.status(403).json({ success: false, message: "Admin is blocked" });
         }
 
-        req.userId = decoded?.userId;
+        // req.userId = decoded?.userId;
         console.log("verified")
         next();
 
@@ -89,5 +92,46 @@ export const adminAuth = async (req: CustomRequest, res: Response, next: NextFun
     }
 };
 
+interface CustomJwtPayload extends JwtPayload {
+    userId: string; // Adjust according to your payload structure
+    _id?: string; // Include any other properties you might have
+  }
 
+ const userAuth = asyncHandlers(async (req ,res,next) => {
+    console.log('auth/..................................')
+   try {
+    const token =  req.cookies?.accessToken || req.headers.authorization?.replace("Bearer","")
+    console.log("token :",token)
+    if(!token) {
+     throw new ApiError(401,"Unauthorized request")
+    }
+    console.log('........')
+    // const decodedToken =  JWT.verify(token, process.env.ACCESS_TOKEN_SECRET as string ) ;
+//    const decodedToken =  jwt.verifyJwt(token.trim())
+const decodedToken=JWT.verify(token.trim(),process.env.ACCESS_TOKEN_SECRET as string ) as JwtPayload  
 
+console.log('//////////')
+
+    console.log(decodedToken)       
+
+    const userData: UserWithoutCredential | null = await userRepository.getUserById(decodedToken?.id);
+    console.log("user data ",userData)
+
+    if(!userData) {
+     throw new ApiError(401,"Invalid Access Token")
+     }
+     req.userId = userData._id
+     next()
+   }catch (error: unknown) {
+    console.log(error)
+    if (error instanceof Error) {
+      throw new ApiError(401, error.message || "Invalid Access Token");
+    } else {
+      throw new ApiError(401, "Invalid Access Token");
+    }
+  }
+
+})
+
+export default userAuth
+ 

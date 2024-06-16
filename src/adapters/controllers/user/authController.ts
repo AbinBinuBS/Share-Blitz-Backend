@@ -9,6 +9,11 @@ import jwt from 'jsonwebtoken'
 
 import { RequestWithUserId } from "../../../domain/interface/controllers/userControllerInterface";
 import sendEmail from "../../../infrastructure/utils/helpers/NodeMailer";
+import asyncHandlers from "../../../infrastructure/utils/handlers/asyncHandlers";
+import ApiError from "../../../infrastructure/utils/handlers/ApiError";
+import UserModel from "../../../infrastructure/database/models/userModel";
+import ApiResponse from "../../../infrastructure/utils/handlers/ApiResponse";
+import { generateAccessAndRefreshTokens } from "../../../domain/services/TokenGeneration";
 
 
 class userController {
@@ -30,7 +35,7 @@ class userController {
             console.log(error)
         }
     }
-
+   
     async verifyOtp(req:Request , res: Response) {
         try {
             console.log('verify otp controller worked')
@@ -104,7 +109,7 @@ class userController {
     }
 
 
-
+  
 
     async login(req:Request,res:Response) : Promise <any> {
         try {
@@ -115,14 +120,29 @@ class userController {
                 return res.status(200).json({success:false,message:"Email and Password are required"})
 
             const responseData : any = await this.userCase.login(req.body as UserLogin)
+            console.log("logind response",responseData)
             if(responseData?.success){
-                res.cookie("userToken", responseData.token, {
-                    expires: new Date(Date.now() + 25892000000),
-                    httpOnly: true,
-                  });
-               return res.status(200).json({success:true,token:responseData.token,user:responseData.user})
+                const options = {
+                            httpOnly:true,    
+                            secure:true
+                        }
+                return res.status(200)
+                .cookie("accessToken",responseData.accessToken,options)
+                .cookie("refreshToken",responseData.refreshToken,options)
+                .json(new ApiResponse (200,{success:true,user : responseData.user ,accessToken: responseData.accessToken,refreshToken:responseData.refreshToken},"login sucessfully"))
+                // res.cookie("userToken", responseData.token, {
+                //     expires: new Date(Date.now() + 25892000000),
+                //     httpOnly: true,
+                //   });
+            //    return res.status(200).json({success:true,token:responseData.token,user:responseData.user})
             } else {
-                return res.status(200).json({success:false,message:responseData?.message})
+                return res.status(200).json({   statusCode: 200,
+                    data: {
+                        success: false,
+                        message: responseData?.message || 'Unknown error'
+                    },
+                    message: responseData?.message || 'Unknown error',
+                    success: false})
             }
         } catch (error) {
             console.log(error)
@@ -239,7 +259,100 @@ class userController {
     }
 
     
+    async sendForgetPasswordOtp (req : CustomRequest ,res:Response) {
+        try {
+            console.log("send otp in controller")
+          
+            const {email } = req.query
+            const userId = req.userId
+            if(! email )
+                throw new ApiError(400,'email is required')
+            const sendOtp = await this.userCase.sendOtpToEmail(email as string)
+         
+            if (sendOtp.success) {
+                res.status(200).json(new ApiResponse(200,{token: sendOtp.token}, 'OTP sent successfully'));
+              } else {
+                throw new ApiError(400, sendOtp?.message || 'Failed to send OTP');
+              }
+        } 
+        catch (error) {
+           if (error instanceof ApiError) {
+             res.status(error.statusCode).json(new ApiResponse(error.statusCode, null, error.message));
+           } else {
+             res.status(500).json(new ApiResponse(500, null, 'Something went wrong'));
+           }
+           console.error(error);
+        }
+    } 
+    
+    async verifyForgetPasswordOtp (req : CustomRequest ,res:Response) {
+        try {
+            console.log("verify otp in controller",req.body)
+          
+            const {token,otp } = req.body
+            const userId = req.userId
+            if(!token || !otp )
+                throw new ApiError(400,'otp and token is required')
+            const verifyOtp = await this.userCase.verifyForgetPasswordOtp(otp as string , token as string)
+         
+            if (verifyOtp.success) {
+                res.status(200).json(new ApiResponse(200,{}, verifyOtp?.message));
+              } else {
+                  throw new ApiError(400, verifyOtp?.message);
+            }
+        } 
+        catch (error) {
+           if (error instanceof ApiError) {
+             res.status(error.statusCode).json(new ApiResponse(error.statusCode, null, error.message));
+           } else {
+             res.status(500).json(new ApiResponse(500, null, 'Something went wrong'));
+           }
+           console.error(error);
+        }
+    }
+
+    verifyForgetPassword = asyncHandlers(async (req: Request, res: Response) => {
+        console.log("verify otp in controller",req.body)
+          
+        const {password,email } = req.body
+        if ([password, email].some((field: string) => field?.trim() === "")) {
+            throw new ApiError(400, 'All fields are required');
+        }
+      
+        const verifyOtp = await this.userCase.verifyForgetPassword(email as string ,password as string)
+     
+        if (verifyOtp.success) {
+            res.status(200).json(new ApiResponse(200,{}, verifyOtp?.message));
+          } else {
+              throw new ApiError(400, verifyOtp?.message);
+        }
+    });
+
+    // async verifyForgetPassword1 (req : CustomRequest ,res:Response) {
+    //     try {
+    //         console.log("verify otp in controller",req.body)
+          
+    //         const {password,email } = req.body
+    //         if(!password )
+    //             throw new ApiError(400,'password is required')
+    //         const verifyOtp = await this.userCase.verifyForgetPasswordOtp(email as string ,password as string)
+         
+    //         if (verifyOtp.success) {
+    //             res.status(200).json(new ApiResponse(200,{}, verifyOtp?.message));
+    //           } else {
+    //               throw new ApiError(400, verifyOtp?.message);
+    //         }
+    //     } 
+    //     catch (error) {
+    //        if (error instanceof ApiError) {
+    //          res.status(error.statusCode).json(new ApiResponse(error.statusCode, null, error.message));
+    //        } else {
+    //          res.status(500).json(new ApiResponse(500, null, 'Something went wrong'));
+    //        }
+    //        console.error(error);
+    //     }
+    // }
+   
+
 }
-
-
 export default userController;

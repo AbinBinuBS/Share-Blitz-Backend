@@ -4,7 +4,9 @@ import LikesModel from "./likesModel";
 import {AvailableSocialLogins, AvailableUserRoles,UserLoginType,UserRolesEnum} from "../../constants/userConstants"
 import CommentsModel from "./commentsModel";
 import ConnectionModel from "./connectionsModel";
-
+import { Jwt } from "jsonwebtoken";
+import JWTtoken from "../../utils/helpers/jwtToken";
+ const JWT = new JWTtoken()
 const userSchema:Schema<UserI>=new Schema({
     name: {
         type: String,
@@ -13,7 +15,8 @@ const userSchema:Schema<UserI>=new Schema({
     userName: {
         type: String,
         required: true,
-        unique:true
+        unique:true,
+        index:true
     },
     email: {
         type: String,
@@ -65,6 +68,10 @@ const userSchema:Schema<UserI>=new Schema({
         type:String,
         enum:AvailableSocialLogins,
         default:UserLoginType.EMAIL_PASSWORD
+    },
+    refreshToken:{
+        type:String,
+        required:false
     },
     location:{
         type:String,
@@ -121,6 +128,16 @@ userSchema.post("save", async function (user, next) {
   });
 
   
+userSchema.methods.generateAccessToken = async function 
+    (){
+    console.log('user genrating toke access')
 
+      return  JWT.createJwtToken(this._id,this.role,process.env.ACCESS_TOKEN_SECRET as string,process.env.ACCESS_TOKEN_EXPIRY || "1d")
+    }
+userSchema.methods.generateRefreshToken = async function 
+(){
+    console.log('user genrating toke refresh')
+    return  JWT.createJwtToken(this._id,this.role,process.env.REFRESH_TOKEN_SECRET as string,process.env.REFRESH_TOKEN_EXPIRY || "10d")
+  }
 const UserModel:Model<UserI>=mongoose.model<UserI>('User',userSchema);
 export default UserModel

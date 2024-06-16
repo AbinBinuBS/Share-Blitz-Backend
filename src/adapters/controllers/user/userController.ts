@@ -1,8 +1,8 @@
 import { Request , Response} from 'express'
 import { postRequestI } from '../../../application/useCase/interface/user/postUseCase';
 import { CustomRequest } from '../../../domain/interface/controllers/userControllerInterface';
-import UserUseCase from '../../../application/useCase/user/userUseCase';
-
+import asyncHandlers from '../../../infrastructure/utils/handlers/asyncHandlers';
+import ApiError from '../../../infrastructure/utils/handlers/ApiError';
 class connectionController {
     private connectionUseCase : any 
     private userUseCase : any 
@@ -13,6 +13,20 @@ class connectionController {
        
     } 
 
+    errHandler = asyncHandlers(async (req: Request, res: Response) => {
+        const { password, email } = req.body;
+        
+        if (!req.body.name) {
+            throw new ApiError(400, 'Name is required');
+        }
+        console.log(req.body.password);
+        
+        if ([name, email].some((field: string) => field?.trim() === "")) {
+            throw new ApiError(400, 'All fields are required');
+        }
+    });
+
+   
 
     async followUser (req:CustomRequest ,res:Response) {
         try {
