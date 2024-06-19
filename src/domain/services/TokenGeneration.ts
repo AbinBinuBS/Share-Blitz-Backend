@@ -29,7 +29,6 @@ export const generateAccessAndRefreshTokens = async (userId: string) => {
       // console.log(" indomng",req.body)
 
       const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
-      console.log(" indomng",incomingRefreshToken)
       if (!incomingRefreshToken) {
         throw new ApiError(401, "Unauthorized request");
       }
@@ -69,7 +68,7 @@ export const generateAccessAndRefreshTokens = async (userId: string) => {
         .json(new ApiResponse(200, { accessToken, refreshToken }, "Access token refreshed"));
         return
     } catch (error) {
-      throw new ApiError(500, 'Something went wrong while refreshing token');
+      // throw new ApiError(500, 'Something went wrong while refreshing token');
     }
   });
 

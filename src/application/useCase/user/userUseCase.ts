@@ -295,7 +295,7 @@ class UserUseCase {
                    };
                   }
                   const hashedPassword = await this.hashPassword.createHash(email.trim())
-console.log("......................................",findUser.password,email,hashedPassword)
+// console.log("......................................",findUser.password,email,hashedPassword)
                 let passwordMatch = await this.hashPassword.compare(email.trim(),findUser.password)
                 console.log('passsword match',passwordMatch)
                 if(!passwordMatch) { 
@@ -310,7 +310,7 @@ console.log("......................................",findUser.password,email,has
                         { expiresIn: "60m" } 
                       );
                     const loggedUserData = await this.userRepository.getUserById(findUser._id as string)
-                    console.log('user data to send ;',loggedUserData)
+                    // console.log('user data to send ;',loggedUserData)
                     return {success:true,user:loggedUserData,token:token}
                 }
             }

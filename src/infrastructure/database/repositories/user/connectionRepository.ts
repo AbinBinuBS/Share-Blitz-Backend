@@ -16,7 +16,7 @@ class ConnectionRepository implements ConnectionRepositoryInterface {
                 { new: true, useFindAndModify: false }
             );
         
-            console.log("result ",result)
+            // console.log("result ",result)
             if(result)
                 return {success:true}
             return {success:false,message:"Failed to follow the user"}
@@ -37,7 +37,7 @@ class ConnectionRepository implements ConnectionRepositoryInterface {
                 { new: true, useFindAndModify: false }
             );
        
-            console.log("result ",result)
+            // console.log("result ",result)
             if(result)
                 return {success:true}
             return {success:false,message:"Something went wrong"}
@@ -50,13 +50,13 @@ class ConnectionRepository implements ConnectionRepositoryInterface {
 
     async findConnectionsById(userId:string):Promise<any> {
         try {
-            console.log("find connectionsbyid in repo :",userId) 
+            // console.log("find connectionsbyid in repo :",userId) 
           
             const result = await ConnectionModel.findOne(
              {userId}
             );
           
-            console.log("result ",result)
+            // console.log("result ",result)
             if(result)
             return {success:true,data : result}
             return {success:false,message:"Connection not found"}
@@ -76,7 +76,7 @@ class ConnectionRepository implements ConnectionRepositoryInterface {
                 { new: true, useFindAndModify: false }
             );
         
-            console.log("result ",result)
+            // console.log("result ",result)
             if(result)
                 return {success:true}
             return {success:false,message:"Failed to follow the user"}
@@ -96,7 +96,7 @@ class ConnectionRepository implements ConnectionRepositoryInterface {
                 { new: true, useFindAndModify: false }
             );
         
-            console.log("result ",result)
+            // console.log("result ",result)
             if(result)
                 return {success:true}
             return {success:false,message:"Failed to follow the user"}

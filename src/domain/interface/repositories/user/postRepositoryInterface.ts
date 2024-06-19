@@ -5,6 +5,7 @@ import PostInterface, { CreatePostRequestModel } from "../../../entities/post"
 interface PostRepositoryInterface {
     createPost(post: CreatePostRequestModel) : Promise <any>,
     getAllPosts(skip : number , limit : number) : Promise <any>,
+    getAllPostsToAdmin() : Promise <any>,
     getPostById(userId : string) : Promise <any>,
     getUserPosts(userId : string) : Promise <any>,
     findPostLikesByPostId(postId:string) : Promise < any>,
@@ -23,6 +24,7 @@ interface PostRepositoryInterface {
     findSavedPostsById(userId:string) : Promise <findSavedPostsByIdInterface>
     deleteComment(postId:string,commentId:string) :Promise <any>
     getTaggedPosts(userId:string) : Promise<any>
+    tooglePostIsBlocked(postId:string) :Promise<any>
 }
 
 export interface findCommentsByIdResponse {

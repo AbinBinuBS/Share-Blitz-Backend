@@ -24,10 +24,13 @@ const controller = new adminController(adminCase)
 const router = express.Router()
 
 router.get('/getAllUsers', adminAuth,(req, res) => { controller.getAllUsers(req, res) });
+router.get('/getAllPosts', adminAuth,(req, res) => { controller.getAllPosts(req, res) });
 router.get('/getUserById', (req, res) => { controller.getUser(req, res) });
 router.get('/getAllReportedPosts', adminAuth, (req, res) => { controller.getAllReportedPosts(req, res) });
+router.get('/getReportsByPostId', adminAuth, (req, res) => { controller.getReportsByPostId(req, res) });
 router.get('/getPostById',adminAuth, (req, res) => { controller.getPostById(req, res) });
 router.patch('/toogleUserStatus',adminAuth, (req, res) => { controller.toogleUserStatus(req, res) });
+router.patch('/tooglePostIsBlocked',adminAuth, (req, res) => { controller.tooglePostIsBlocked(req, res) });
 router.patch('/changeActionStatus',adminAuth, (req, res) => { controller.changeActionStatus(req, res) });
 router.patch('/approveVerificationRequest',adminAuth, (req, res) => { controller.approveVerificationRequest(req, res) });
 router.delete('/deletePost',adminAuth, (req, res) => { controller.deletePost(req, res) });

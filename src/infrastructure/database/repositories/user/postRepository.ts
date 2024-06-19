@@ -41,6 +41,24 @@ class PostRepository implements PostRepositoryInterface {
             return {message: 'something went wrong',success:false}
         }
     } 
+    async tooglePostIsBlocked (postId : string) {
+      try {
+        // Find the user by userId
+        const post = await PostModel.findById(postId);
+  
+        if (!post) {
+            return { success: false, message: "Post not found" };
+        }
+        post.isBlocked = !post.isBlocked;
+  
+        await post.save();
+  
+        return { success: true, data: post };
+    } catch (error) {
+        console.log(error);
+        return { success: false, message: "Failed to block post" };
+    }
+    }
     
     async getAllPosts(skip : number , limit : number) {
         try {
@@ -104,6 +122,68 @@ class PostRepository implements PostRepositoryInterface {
             return {message: 'something went wrong',success:false}
         }
     } 
+
+
+    async getAllPostsToAdmin( ) {
+      try {
+          // console.log("get all post worked in repo :", skip,limit) 
+        
+      //    const postData = await PostModel.find({isBlocked:false,isDeleted:false}).sort({ creationTime: -1 });
+     
+      const postData = await PostModel.aggregate([
+         
+         
+          {
+            $lookup: {
+              from: 'likes', // the name of the Likes collection
+              localField: '_id',
+              foreignField: 'postId',
+              as: 'likesDetails'
+            }
+          },
+          {
+            $lookup: {
+              from: 'comments', // the name of the Comments collection
+              localField: '_id',
+              foreignField: 'postId',
+              as: 'commentsDetails'
+            }
+          },
+          {
+            $unwind: {
+              path: '$likesDetails',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $unwind: {
+              path: '$commentsDetails',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+              $sort: {
+                creationTime: -1 
+              }
+          },
+          // {
+          //   $skip: skip
+          // },
+          // {
+          //     $limit: limit
+          // }
+
+        ]);
+          if(postData)
+              return {success:true,data:postData}
+          return {success:false,message:"Something went wrong"}
+         
+      } catch (error) {
+          console.log(error)
+          return {message: 'something went wrong',success:false}
+      }
+  } 
+    
 
     async getPostById(postId : string) {
         try {

@@ -271,6 +271,17 @@ class UserRepository implements IUserRepository {
       return { success: false, message: "Failed to toggle isVerified" };
   }
   }
+
+  async getUserDetailsFromArray(userIds: string[]): Promise<any> {
+    try {
+        // Fetch user details from UserModel
+        const users = await UserModel.find({ _id: { $in: userIds } }, '-password -refreshToken').exec();
+        return users;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error fetching user details');
+    }
+}
 }
 
 export default UserRepository

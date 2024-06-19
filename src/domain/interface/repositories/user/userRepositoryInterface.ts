@@ -19,6 +19,7 @@ interface UserRepositoryInterface {
     changePrivacy(userId:string) : Promise<any>
     toogleIsVerified(userId:string) : Promise<any>
     changePasswordByEmail(email:string,passsword:string) : Promise<any>
+    getUserDetailsFromArray(users:string[]) : Promise<any>
 } 
 export default UserRepositoryInterface 
 

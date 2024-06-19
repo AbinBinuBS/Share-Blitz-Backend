@@ -1,0 +1,171 @@
+import { Server } from "socket.io";
+
+import { CreatePostRequestModel } from "../../../domain/entities/post";
+import IJwtToken from "../interface/user/jwtInterface";
+// import IUserRepository from "../interface/user/userRepositoryInterface";
+import PostRepositoryInterface from "../../../domain/interface/repositories/user/postRepositoryInterface";
+
+import HashPasswordInterface from "../../../domain/interface/helpers/hashPasswordInterface";
+import UserRepositoryInterface from "../../../domain/interface/repositories/user/userRepositoryInterface";
+import ConnectionRepositoryInterface from "../../../domain/interface/repositories/user/connectionRepositoryInterface";
+import RoomRepositoryInterface from "../../../domain/interface/repositories/user/roomRepository";
+import MessageRepositoryInterface from "../../../domain/interface/repositories/user/messageRepository";
+import { getReceiverSocketId } from "../../../infrastructure/Socket/socket";
+import { io } from "../../..";
+import ChatUseCaseInterface from "../interface/user/chatUseCaseInterface";
+class ChatUseCase implements ChatUseCaseInterface {
+    private userRepository: UserRepositoryInterface;
+    private roomRepository : RoomRepositoryInterface;
+    private messageRepository : MessageRepositoryInterface;
+    private jwtToken : IJwtToken
+    private hashPassword :HashPasswordInterface
+    private io : Server
+
+    constructor(
+        userRepository:UserRepositoryInterface ,
+        roomRepository:RoomRepositoryInterface,
+        messageRepository:MessageRepositoryInterface,
+        jwtToken :IJwtToken,
+        hashedPassword:HashPasswordInterface,
+        io: Server
+    )  {
+        this.userRepository =userRepository;
+        this.roomRepository = roomRepository;
+        this.messageRepository = messageRepository;
+        this.jwtToken = jwtToken;
+        this.hashPassword = hashedPassword;
+        this.io = io; // Assign io
+    }
+
+    async sendMessage(senderId : string,receiverId : string,message:any)  {
+       try {
+            console.log("recieved message usecase") 
+
+            let findChatRoom = await this.roomRepository.findChatRoom(senderId,receiverId)
+            if(!findChatRoom?.success){
+                const createChatRoom =await this.roomRepository.createChatRoom(senderId,receiverId)
+                if(createChatRoom.success)
+                    findChatRoom = createChatRoom
+            }
+            if(!findChatRoom.room)
+                return {success:false,message:"Failed to create or find the room"}
+            const newMessage = await this.messageRepository.createNewMessage(senderId,receiverId,message)
+            console.log(newMessage)
+            if(newMessage.success){
+                const addNewMessageIdtoRoom = await this.roomRepository.addNewMessageId(findChatRoom?.room?._id,newMessage.message._id)
+                if(addNewMessageIdtoRoom){
+                    const receiverSocketId = getReceiverSocketId(receiverId)
+                    if(receiverSocketId) {
+                        io.to(receiverId).emit("newMessage",newMessage.message)
+                    }
+                }
+                return {success:true,data:newMessage.message}
+            }
+            return {success:false,message:newMessage.message}
+       } catch (error) {
+          console.log(error)         
+       }
+    }
+
+    async getMessage(senderId : string,userToChat :string)  {
+        try {
+             console.log("recieved get message usecase") 
+             let findChatRoom = await this.roomRepository.getAllMessages(senderId,userToChat)
+             if(findChatRoom?.success){
+             return {success:true,data:findChatRoom.room}
+             }
+             return {success:false,message:findChatRoom?.message}
+
+        } catch (error) {
+           console.log(error)         
+        }
+     }
+    
+    async getRecentChats(userId : string) {
+        try {
+             console.log("recieved get message usecase") 
+             let findChatRoom = await this.roomRepository.getRecentChats(userId)
+             console.log('rooms ',findChatRoom)
+             if(findChatRoom?.success){
+             const userIds = new Set<string>();
+             findChatRoom.chatRooms.forEach((room: { participants: string[] }) => {
+                room.participants.forEach(participant => {
+                    if (participant.toString() != userId) {
+                        userIds.add(participant.toString());
+                    }
+                });
+            });
+             const userDetails = await this.userRepository.getUserDetailsFromArray(Array.from(userIds))
+             if(userDetails) {
+                return {success:true,data:userDetails}
+             }
+             return {success:false,message:"Something went wrong"}
+
+                   }
+             return {success:false,message:findChatRoom?.message}
+
+        } catch (error) {
+           console.log(error)         
+        }
+     }
+
+     async deleteMessage(senderId : string,receiverId : string,messageId:string)  {
+        try {
+             console.log("recieved delete message usecase") 
+ 
+             let findChatRoom = await this.roomRepository.findChatRoom(senderId,receiverId)
+             if(!findChatRoom?.success){
+                return {success:false,message:"Chat doesn't exists"}
+             }
+            
+             const deleteMessage = await this.messageRepository.deleteMessage(senderId,receiverId,messageId)
+             console.log(deleteMessage)
+             if(deleteMessage.success){
+                 const removeMessageIdtoRoom = await this.roomRepository.removeMessageId(findChatRoom?.room?._id,deleteMessage.data._id)
+                 if(removeMessageIdtoRoom){
+                     const receiverSocketId = getReceiverSocketId(receiverId)
+                     if(receiverSocketId) {
+                        console.log('delete',deleteMessage.data)
+                         io.to(receiverId).emit("deletedMessage",messageId)
+                     }
+                 }
+                 return {success:true,data:deleteMessage.data}
+             }
+             return {success:false,message:deleteMessage.message}
+        } catch (error) {
+           console.log(error)         
+        }
+     }
+
+     async editMessage(senderId : string,receiverId : string,messageId:string,message:string)  {
+        try {
+             console.log("recieved edit message usecase") 
+ 
+ 
+             let findChatRoom = await this.roomRepository.findChatRoom(senderId,receiverId)
+             if(!findChatRoom?.success){
+                return {success:false,message:"Chat doesn't exists"}
+             }
+            
+             const editMessage = await this.messageRepository.editMessage(senderId,receiverId,messageId,message)
+             console.log(editMessage)
+             if(editMessage.success){
+                     const receiverSocketId = getReceiverSocketId(receiverId)
+                     if(receiverSocketId) {
+                        console.log('edited',editMessage.data)
+                         io.to(receiverId).emit("editedMessage",editMessage.data)
+                     }
+                 }
+                 return {success:true,data:editMessage.data}
+             
+        } catch (error) {
+           console.log(error)         
+        }
+     }
+    
+}
+
+
+
+ 
+export default ChatUseCase

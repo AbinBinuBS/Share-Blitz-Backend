@@ -3,7 +3,7 @@ import { postRequestI } from '../../../application/useCase/interface/user/postUs
 import { CustomRequest } from '../../../domain/interface/controllers/userControllerInterface';
 import asyncHandlers from '../../../infrastructure/utils/handlers/asyncHandlers';
 import ApiError from '../../../infrastructure/utils/handlers/ApiError';
-class connectionController {
+class userController {
     private connectionUseCase : any 
     private userUseCase : any 
 
@@ -71,13 +71,13 @@ class connectionController {
 
     async getConnections (req:CustomRequest ,res:Response) {
         try {
-          console.log('get connections controller worked')
+        //   console.log('get connections controller worked')
 
             const {userId} = req.query
             if(!userId) 
                 return res.status(409).json({success:false,message:"UserId is required"})
             const getConnections = await this.connectionUseCase.getConnections(userId as string)
-            console.log(getConnections)
+            // console.log(getConnections)
             if(getConnections.success){
                     return res.status(200).json({success:true,connections:getConnections.data})
             } else {
@@ -91,7 +91,7 @@ class connectionController {
 
     async checkIsFriend (req:CustomRequest ,res:Response) {
         try {
-          console.log('check is friend controller worked')
+        //   console.log('check is friend controller worked')
 
             const {targetUserId} = req.query
             const userId = req.userId
@@ -112,7 +112,7 @@ class connectionController {
 
     async searchUser (req:CustomRequest ,res:Response) {
         try {
-          console.log('Search user controller worked')
+        //   console.log('Search user controller worked')
 
             const {searchInput} = req.query
           console.log(searchInput)
@@ -132,7 +132,7 @@ class connectionController {
     async changePrivacy (req:CustomRequest ,res:Response) {
         try {
             // const userId = req.userId
-            console.log("changePrivacy worked")
+            // console.log("changePrivacy worked")
         
             const userId = req?.userId
             if(!userId ) 
@@ -152,7 +152,7 @@ class connectionController {
     async isRequestedVerification (req:CustomRequest ,res:Response) {
         try {
             // const userId = req.userId
-            console.log("is requested verification worked")
+            // console.log("is requested verification worked")
         
             const userId = req?.userId
             if(!userId ) 
@@ -172,8 +172,8 @@ class connectionController {
     async submitVerification (req:CustomRequest ,res:Response) {
         try {
             // const userId = req.userId
-            console.log("submit verification worked")
-            console.log(req.body)
+            // console.log("submit verification worked")
+            // console.log(req.body)
             const {idUrl} = req.body
             const userId = req?.userId
             if(!userId ) 
@@ -193,8 +193,8 @@ class connectionController {
     async updatePaymentDetails (req:CustomRequest ,res:Response) {
         try {
             // const userId = req.userId
-            console.log("update payment details worked")
-            console.log(req.body)
+            // console.log("update payment details worked")
+            // console.log(req.body)
             const {plan,paymentId} = req.body
             const userId = req?.userId
             if(!userId ) 
@@ -215,4 +215,4 @@ class connectionController {
     }
    
 }
-export default connectionController 
+export default userController 

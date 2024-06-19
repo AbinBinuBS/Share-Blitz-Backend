@@ -45,6 +45,20 @@ class AdminUseCase implements adminUseCaseInterface {
          console.log(error) 
         }
      }
+
+     async getAllPosts()  {
+        try {
+            console.log("worked get all users usecase")
+             const posts = await this.postRepository.getAllPostsToAdmin()
+             if(posts.success){
+                 return {success:true,data:posts.data}
+             } 
+             return {success:false,message:posts.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
+
      async getAllReportedPosts()  {
         try {
             console.log("worked get all users usecase")
@@ -57,7 +71,20 @@ class AdminUseCase implements adminUseCaseInterface {
          console.log(error) 
         }
      }
-    
+
+     async getReportsByPostId(postId:string)  {
+        try {
+            console.log("worked get reports by posts usecase")
+             const post  = await this.reportRepository.getReportsByPostId(postId)
+             if(post.success){
+                 return {success:true,data:post.data}
+             } 
+             return {success:false,message:post?.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
+     
      async toogleUserStatus(userId:string)  {
         try {
             console.log("worked toogle user status usecase")
@@ -71,6 +98,20 @@ class AdminUseCase implements adminUseCaseInterface {
         }
      }
 
+        
+     async tooglePostIsBlocked(postId:string)  {
+        try {
+            console.log("worked toogle post status usecase")
+             const changeStatus  = await this.postRepository.tooglePostIsBlocked(postId)
+             if(changeStatus.success){
+                 return {success:true,updatedStatus:changeStatus.data}
+             } 
+             return {success:false,message:changeStatus?.message}
+        } catch (error) {
+         console.log(error) 
+        }
+     }
+     
      async getPostById( postId : string )  {
         try {
              const post = await this.postRepository.getPostById(postId)

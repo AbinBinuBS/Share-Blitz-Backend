@@ -27,6 +27,23 @@ class adminController {
         }
     }
 
+    async getAllPosts (req: Request ,res : Response) {
+        try {
+            console.log('get all posts worked')
+            // console.log(req.query)
+            const postData = await this.adminUseCase.getAllPosts()
+            console.log('user data :',postData)
+            if(postData.success) {
+                return res.status(200).json({success:true,posts:postData.data})
+            }
+          
+            return res.status(200).json({success:false ,message:postData.message})
+        } catch (error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
     async toogleUserStatus (req: Request ,res : Response) {
         try {
             console.log('toogle user worked')
@@ -47,6 +64,27 @@ class adminController {
             console.log(error)
         }
     }
+
+    async tooglePostIsBlocked (req: Request ,res : Response) {
+        try {
+            console.log('toogle post blocked worked')
+            console.log(req.body)
+            const {postId} = req.body
+            if(!postId )
+                return res.status(200).json({success:false ,message:"post id is required"})
+
+            const changeStatus = await this.adminUseCase.tooglePostIsBlocked(postId as string)
+            console.log('user data :',changeStatus)
+            if(changeStatus.success) {
+                return res.status(200).json({success:true,updateStatus:changeStatus.updatedStatus})
+            }
+          
+            return res.status(200).json({success:false ,message:changeStatus.message})
+        } catch (error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
     async getAllReportedPosts (req: Request ,res : Response) {
         try {
             console.log('load reported post worked')
@@ -56,6 +94,27 @@ class adminController {
             console.log('reported data :',loadReportedPosts)
             if(loadReportedPosts.success) {
                 return res.status(200).json({success:true,reportedPosts:loadReportedPosts.data})
+            }
+          
+            return res.status(200).json({success:false ,message:loadReportedPosts.message})
+        } catch (error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async getReportsByPostId (req: Request ,res : Response) {
+        try {
+            console.log('get reports by post  worked')
+            const { postId} = req.query
+            console.log(req.query)
+            console.log(req.params)
+            console.log(req.body)
+
+            const loadReportedPosts = await this.adminUseCase.getReportsByPostId(postId as string)
+            console.log('reported data :',loadReportedPosts)
+            if(loadReportedPosts.success) {
+                return res.status(200).json({success:true,reports:loadReportedPosts.data})
             }
           
             return res.status(200).json({success:false ,message:loadReportedPosts.message})

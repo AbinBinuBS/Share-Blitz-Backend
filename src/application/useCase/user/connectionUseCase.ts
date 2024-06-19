@@ -69,7 +69,7 @@ class ConnectionUseCase {
      }
     async getConnections(userId : string)  {
         try {
-             console.log("get connections usecase worked ",userId)
+            //  console.log("get connections usecase worked ",userId)
              const userConnection = await this.connectionRepository.findConnectionsById(userId );
             //  console.log("user connection :",userConnection.data)
 
@@ -85,12 +85,12 @@ class ConnectionUseCase {
 
      async checkIsFriend(userId : string,targetUserId:string)  {
         try {
-             console.log("get connections usecase worked ",userId)
+            //  console.log("get connections usecase worked ",userId)
              const userConnection = await this.connectionRepository.findConnectionsById(userId );
             //  console.log("user connection :",userConnection.data)
              if(userConnection.success){
              const isFriend = userConnection?.data?.followings.some((user: {userId : string})=>user.userId === targetUserId)
-                console.log('............isFriemd',isFriend)
+                // console.log('............isFriemd',isFriend)
    
                  return {success:true,isFriend:isFriend}
              } 

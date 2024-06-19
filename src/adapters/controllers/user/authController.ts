@@ -23,7 +23,7 @@ class userController {
     }
     async createUser(req:Request , res: Response) {
         try {
-            console.log('create user controller worked')
+            console.log('crea te user controller worked')
 
             const userData = await this.userCase.createUser(req?.body as UserRequestModel)
             if(userData.success) {
@@ -38,13 +38,13 @@ class userController {
    
     async verifyOtp(req:Request , res: Response) {
         try {
-            console.log('verify otp controller worked')
-            console.log(req.body)
-            console.log(req.headers)
+            // console.log('verify otp controller worked')
+            // console.log(req.body)
+            // console.log(req.headers)               
             let token = req.headers.authorization?.split(' ')[1] as string ;
              
             const response = await this.userCase.VerifyOtp(token,req?.body.otp as Otp) 
-            console.log('console response ',response)
+            // console.log('console response ',response)
             if(response?.success) {
                return res.status(201).send(response)
             }
@@ -57,7 +57,7 @@ class userController {
 
     async sendOtp(req:Request,res:Response ): Promise<any> {
         try {
-            console.log('send otp controller worked')
+            // console.log('send otp controller worked')
 
             const {user} = req.body
             console.log(req.body)
@@ -82,10 +82,10 @@ class userController {
 
     async resendOtp(req:Request,res:Response ): Promise<any> {
         try {
-            console.log('re send otp controller worked')
+            // console.log('re send otp controller worked')
 
           
-            console.log(req.body)
+            // console.log(req.body)
             let token = req.headers.authorization?.split(' ')[1] as string ;
                 console.log('token conteoller :---------',token)
             const responseData : any = await this.userCase.resendOtp(token)
@@ -114,13 +114,13 @@ class userController {
     async login(req:Request,res:Response) : Promise <any> {
         try {
             console.log("Login in controller worked")
-            console.log(req.body)
+            // console.log(req.body)
             const {email,password} = req.body
             if(!email || !password)
                 return res.status(200).json({success:false,message:"Email and Password are required"})
 
             const responseData : any = await this.userCase.login(req.body as UserLogin)
-            console.log("logind response",responseData)
+            // console.log("logind response",responseData)
             if(responseData?.success){
                 const options = {
                             httpOnly:true,    
@@ -180,7 +180,7 @@ class userController {
             console.log(req.body)
             const {email} = req.body
             const user = await this.userCase.Glogin( email);
-            console.log('send dat g login;',user)
+            // console.log('send dat g login;',user)
             if(user?.success){
                 res.cookie("userToken", user.token, {
                     expires: new Date(Date.now() + 25892000000),
@@ -198,8 +198,8 @@ class userController {
     }
     async getUser (req : Request ,res:Response) {
         try {
-            console.log("Get user worked in controller")
-            console.log(req.query)
+            // console.log("Get user worked in controller")
+            // console.log(req.query)
             const {userId} = req.query
             const userData = await this.userCase.getUser(userId as string)
             // console.log(userData)
@@ -220,12 +220,12 @@ class userController {
     async editProfile (req : CustomRequest ,res:Response) {
         try {
             console.log("Edit profile worked in controller")
-            console.log(req?.userId)
+            // console.log(req?.userId)
             console.log(req.body)
             const  { userData } = req.body 
             const userId = req.userId
             const editUserProfile = await this.userCase.editUserProfile(userId as string,userData)
-            console.log('response edit user profile :',editUserProfile)
+            // console.log('response edit user profile :',editUserProfile)
             if(editUserProfile?.success){
             return res.status(200).json({success:true,userData:editUserProfile.data})
             }
@@ -239,9 +239,9 @@ class userController {
 
     async savePost (req : CustomRequest ,res:Response) {
         try {
-            console.log("save post in controller")
-            console.log(req.body)
-            console.log(req.query)
+            // console.log("save post in controller")
+            // console.log(req.body)
+            // console.log(req.query)
             const {postId } = req.body
             const userId = req.userId
             const savePost = await this.userCase.savePost(userId as string,postId as string)

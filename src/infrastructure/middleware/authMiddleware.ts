@@ -51,9 +51,9 @@ interface CustomRequest extends Request {
 // export default userAuth
 
 
-export const adminAuth = async (req: CustomRequest, res: Response, next: NextFunction) => {
+export const adminAuth1 = async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
-        
+        console.log("admin auth worked")
         const token = req.headers.authorization;
 
         if (!token) {
@@ -92,42 +92,36 @@ export const adminAuth = async (req: CustomRequest, res: Response, next: NextFun
     }
 };
 
-interface CustomJwtPayload extends JwtPayload {
-    userId: string; // Adjust according to your payload structure
-    _id?: string; // Include any other properties you might have
-  }
+
 
  const userAuth = asyncHandlers(async (req ,res,next) => {
-    console.log('auth/..................................')
+    // console.log('auth/..................................')
    try {
     const token =  req.cookies?.accessToken || req.headers.authorization?.replace("Bearer","")
-    console.log("token :",token)
+    // console.log("token :",token)
     if(!token) {
      throw new ApiError(401,"Unauthorized request")
     }
-    console.log('........')
-    // const decodedToken =  JWT.verify(token, process.env.ACCESS_TOKEN_SECRET as string ) ;
-//    const decodedToken =  jwt.verifyJwt(token.trim())
-const decodedToken=JWT.verify(token.trim(),process.env.ACCESS_TOKEN_SECRET as string ) as JwtPayload  
+  
+    const decodedToken=JWT.verify(token.trim(),process.env.ACCESS_TOKEN_SECRET as string ) as JwtPayload  
 
-console.log('//////////')
 
-    console.log(decodedToken)       
+    // console.log(decodedToken)       
 
     const userData: UserWithoutCredential | null = await userRepository.getUserById(decodedToken?.id);
-    console.log("user data ",userData)
+    // console.log("user data ",userData)
 
     if(!userData) {
-     throw new ApiError(401,"Invalid Access Token")
+     throw new ApiError(401,) 
      }
      req.userId = userData._id
      next()
    }catch (error: unknown) {
     console.log(error)
     if (error instanceof Error) {
-      throw new ApiError(401, error.message || "Invalid Access Token");
+      throw new ApiError(401,);
     } else {
-      throw new ApiError(401, "Invalid Access Token");
+      throw new ApiError(401,);
     }
   }
 
@@ -135,3 +129,39 @@ console.log('//////////')
 
 export default userAuth
  
+export const adminAuth = asyncHandlers(async (req ,res,next) => {
+    console.log('admin auth/..................................')
+   try {
+    const token =  req.cookies?.accessToken || req.headers.authorization?.replace("Bearer","")
+    // console.log("token from admin :",token)
+    if(!token) {
+     throw new ApiError(401,"Unauthorized request")
+    }
+  
+    const decodedToken=JWT.verify(token.trim(),process.env.ACCESS_TOKEN_SECRET as string ) as JwtPayload  
+
+
+    console.log(decodedToken)      
+    if (decodedToken && decodedToken.role !== UserRolesEnum.ADMIN) {
+        throw new ApiError(403,"Insufficient privileges")
+    } 
+
+    const adminData: UserWithoutCredential | null = await userRepository.getUserById(decodedToken?.id);
+    // console.log("user data ",adminData)
+
+    if(!adminData) {
+     throw new ApiError(401,)
+     }
+     req.userId = adminData._id
+     next()
+   }catch (error: unknown) {
+    console.log(error)
+    if (error instanceof Error) {
+      throw new ApiError(401,);
+    } else {
+      throw new ApiError(401,);
+    }
+  }
+
+})
+// export default adminAuth
