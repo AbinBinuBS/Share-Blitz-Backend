@@ -9,11 +9,16 @@ class postController {
         this.postUseCase = postUseCase;
     }
 
-    async createPost (req: Request ,res : Response) {
+    async createPost (req: CustomRequest ,res : Response) {
         try {
             console.log('Create Post worked')
             console.log(req.body)
             const {postData} = req.body 
+            const userId = req.userId
+            if(!userId || !postData) 
+            return res.status(200).json({success:false ,message:"insufficent data!!"})
+
+            postData.userId = userId
             const savePost = await this.postUseCase.createPost(postData as postRequestI)
             if(savePost.success){
                 return res.status(200).json({success:true,postData:savePost.postData})

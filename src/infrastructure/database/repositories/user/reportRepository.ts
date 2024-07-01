@@ -43,15 +43,26 @@ class ReportRepository implements ReportRepositoryInterface {
     } 
     async changeActionStatus(reportId : string):Promise<any> {
         try {
-            console.log(" change action status worked in repo :") 
-            
-            const result = await ReportModel.findByIdAndUpdate(reportId,{actionTaken:true},{new:true})
+            console.log("Toggle action status worked in repo :");
         
-            console.log("result ",result)
-            if(result)
-                return {success:true,}
-            return {success:false,message:"Failed to change action statusff"}
-           
+        const report = await ReportModel.findById(reportId);
+
+        if (!report) {
+            return { success: false, message: "Report not found" };
+        }
+        
+        const updatedReport = await ReportModel.findByIdAndUpdate(
+            reportId, 
+            { actionTaken: !report.actionTaken }, 
+            { new: true }
+        );
+
+        console.log("result ", updatedReport);
+        if (updatedReport) {
+            return { success: true, data: updatedReport };
+        }
+        
+        return { success: false, message: "Failed to change action status" };
         } catch (error) {
             console.log(error)
             return {duplicate: false,success:false}

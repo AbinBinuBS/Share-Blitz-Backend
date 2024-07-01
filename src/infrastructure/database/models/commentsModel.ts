@@ -1,7 +1,5 @@
 import mongoose, { Schema, Model } from "mongoose";
 import CommentsInterface, { ReplyComment }  from "../../../domain/entities/comments";
-import UserModel from "./userModel";
-import PostModel from "./postModel";
 
 
 const replyCommentSchema = new Schema<ReplyComment>(

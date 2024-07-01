@@ -7,7 +7,10 @@ interface IChatMessage extends Document {
   text?: string;
   videoUrl?: string;
   imageUrl?: string;
-//   chat: mongoose.Types.ObjectId;
+  seen:boolean
+  isDeleted:boolean
+  isEdited:boolean
+  isDeletedFromMe:boolean
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,6 +28,7 @@ const chatMessageSchema = new Schema<IChatMessage>(
       ref: "UserModel",
       required: true,
     },
+  
     text: {
       type: String,
     },
@@ -34,11 +38,22 @@ const chatMessageSchema = new Schema<IChatMessage>(
     imageUrl: {
       type: String,
     },
-    // chat: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "Chat",
-    //   required: true,
-    // },
+    seen :{
+      type:Boolean,
+      default:false
+    },
+    isEdited :{
+      type:Boolean,
+      default:false
+    },
+    isDeletedFromMe :{
+      type:Boolean,
+      default:false
+    },
+    isDeleted :{
+      type:Boolean,
+      default:false
+    },
   },
   { timestamps: true }
 );

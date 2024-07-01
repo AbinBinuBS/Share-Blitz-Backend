@@ -6,8 +6,7 @@ interface IChat extends Document {
   lastMessage?: mongoose.Types.ObjectId;
   participants: mongoose.Types.ObjectId[];
   messages: mongoose.Types.ObjectId[];
-  // sender: mongoose.Types.ObjectId;
-  // receiver: mongoose.Types.ObjectId;
+
 
   admin: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -29,16 +28,7 @@ const ChatRoomSchema = new Schema<IChat>(
       type: Schema.Types.ObjectId,
       ref: "ChatMessage",
     },
-    // sender: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: "UserModel",
-    //     required: true,
-    //   },
-    //   receiver: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: "UserModel",
-    //     required: true,
-    //   },
+   
     participants: [
       {
         type: Schema.Types.ObjectId,

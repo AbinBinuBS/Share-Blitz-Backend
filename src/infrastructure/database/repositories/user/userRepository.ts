@@ -276,7 +276,7 @@ class UserRepository implements IUserRepository {
     try {
         // Fetch user details from UserModel
         const users = await UserModel.find({ _id: { $in: userIds } }, '-password -refreshToken').exec();
-        return users;
+        return {success:true,users};
     } catch (error) {
         console.error(error);
         throw new Error('Error fetching user details');

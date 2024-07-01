@@ -24,24 +24,15 @@ const controller = new chatController(chatUseCase)
 
 const router = express.Router()
 
+router.get('/recentChats',userAuth,(req, res,next:NextFunction) => { controller.getRecentChatedUsers(req, res,next) });
+router.get('/messages/:id',(req, res,next:NextFunction) => { controller.findMessageById(req, res,next) });
 router.get('/messages/getAllMessages/:id',userAuth,(req, res,next:NextFunction) => { controller.getMessage(req, res,next) });
 router.post('/messages/send/:id',userAuth,(req, res,next:NextFunction) => { controller.sendMessage(req, res,next) });
-router.get('/recentChats',userAuth,(req, res,next:NextFunction) => { controller.getRecentChatedUsers(req, res,next) });
 router.delete('/messages/deleteMessage',userAuth,(req, res,next:NextFunction) => { controller.deleteMessage(req, res,next) });
 router.patch('/messages/editMessage',userAuth,(req, res,next:NextFunction) => { controller.editMessage(req, res,next) });
+router.patch('/messages/markAsRead/:selectedUserId',userAuth,(req, res,next:NextFunction) => { controller.markMessageAsRead(req, res,next) });
+router.get('/messages/unReadedMessages/:roomId',userAuth,(req, res,next:NextFunction) => { controller.unReadedMessages(req, res,next) });
 
-
-// router.get('/getAllPosts', adminAuth,(req, res) => { controller.getAllPosts(req, res) });
-// router.get('/getUserById', (req, res) => { controller.getUser(req, res) });
-// router.get('/getAllReportedPosts', adminAuth, (req, res) => { controller.getAllReportedPosts(req, res) });
-// router.get('/getReportsByPostId', adminAuth, (req, res) => { controller.getReportsByPostId(req, res) });
-// router.get('/getPostById',adminAuth, (req, res) => { controller.getPostById(req, res) });
-// router.patch('/toogleUserStatus',adminAuth, (req, res) => { controller.toogleUserStatus(req, res) });
-// router.patch('/tooglePostIsBlocked',adminAuth, (req, res) => { controller.tooglePostIsBlocked(req, res) });
-// router.patch('/changeActionStatus',adminAuth, (req, res) => { controller.changeActionStatus(req, res) });
-// router.patch('/approveVerificationRequest',adminAuth, (req, res) => { controller.approveVerificationRequest(req, res) });
-// router.delete('/deletePost',adminAuth, (req, res) => { controller.deletePost(req, res) });
-// router.get('/getVerificationData', adminAuth, (req, res) => { controller.getVerificationData(req, res) });
 
 
 

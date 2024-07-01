@@ -240,7 +240,7 @@ class userController {
     async savePost (req : CustomRequest ,res:Response) {
         try {
             // console.log("save post in controller")
-            // console.log(req.body)
+            // console.log(req.body) 
             // console.log(req.query)
             const {postId } = req.body
             const userId = req.userId

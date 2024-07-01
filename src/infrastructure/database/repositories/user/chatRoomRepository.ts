@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import ChatRoomRepositoryInterface from "../../../../domain/interface/repositories/user/roomRepository";
 import { ChatRoomModel } from "../../models/ChatRoomModel";
 import ConnectionModel from "../../models/connectionsModel";
+import { ChatMessageModel } from "../../models/ChatMessageModel";
 class ChatRoomRepository implements ChatRoomRepositoryInterface {
 
     async findChatRoom(senderId:string,receiverId:string):Promise<any> {
@@ -22,7 +23,43 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
             return { success: false, message: "Failed to find chat room" };
         }
     } 
-
+    async findChatRoomById(roomId:string):Promise<any> {
+        try {
+            let chatRoom = await ChatRoomModel.findById(roomId)
+            if(chatRoom){
+                return {success:true,room:chatRoom}
+            }
+            
+            return {success:false,message:"Room not exist"}
+           
+        } catch (error) {
+            console.error("Error finding chat room:", error);
+            return { success: false, message: "Failed to find chat room" };
+        }
+    } 
+    
+    async unReadedMessages(roomId:string ,userId:string):Promise<any> {
+        try {
+            const chatRoom = await ChatRoomModel.findById(roomId);
+            if (!chatRoom) {
+                return {success:false,message:"Room not exist"}
+            }
+        
+            // Find messages in the chat room that are not seen
+            const unseenMessages = await ChatMessageModel.find({
+              _id: { $in: chatRoom.messages },
+              receiverId:userId,
+              seen: false,
+            }).exec();
+            
+            return {success:true,data:unseenMessages}
+           
+        } catch (error) {
+            console.error("Error finding chat room:", error);
+            return { success: false, message: "Failed to find chat room" };
+        }
+    }
+    
     async createChatRoom(senderId:string,receiverId:string):Promise<any> {
         try {
             const createRoom = new ChatRoomModel({
@@ -48,6 +85,7 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
             if(!chatRoom)
                 return {success:false,message: " Room not exist"}
             chatRoom.messages.push(new mongoose.Types.ObjectId(messageId))
+            chatRoom.lastMessage= new mongoose.Types.ObjectId(messageId)
            const updatedRoom= await chatRoom.save()
             return {success:true,room:updatedRoom}        
            
@@ -84,6 +122,7 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
            
            if(chatRoom)
             return {success:true,room:chatRoom}  
+           return {success:true,room:[]}  
 
            return {success:false,message:"No room found"}        
            
@@ -97,13 +136,29 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
         try {
             const chatRooms = await ChatRoomModel.find({
                 participants: userId
-            }).exec();
+            }).sort({updatedAt:-1}).exec();
         
             if (!chatRooms || chatRooms.length === 0) {
                 return {success: false ,message:'No recent chats found'}
             } 
 
            return {success:true,chatRooms:chatRooms}        
+           
+        } catch (error) {
+            console.log(error)
+            return {success: false}
+        }
+    }
+
+    async markMessageAsRead(userId:string,selectedUserId:string):Promise<any> {
+        try {
+          
+            const result = await ChatMessageModel.updateMany(
+                { senderId: selectedUserId, receiverId: userId, seen: false },
+                { $set: { seen: true } }
+              );
+          
+              return { success: true,data:{} };   
            
         } catch (error) {
             console.log(error)

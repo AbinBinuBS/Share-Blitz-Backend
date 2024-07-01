@@ -170,7 +170,7 @@ class adminController {
             const changeStatus = await this.adminUseCase.changeActionStatus(reportId)
             console.log('change status :',changeStatus)
             if(changeStatus.success) {
-                return res.status(200).json({success:true,updateStatus:changeStatus.updatedStatus})
+                return res.status(200).json({success:true,updateStatus:changeStatus.updatedStatus.actionTaken})
             }
           
             return res.status(200).json({success:false ,message:changeStatus.message})

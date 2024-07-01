@@ -474,11 +474,20 @@ class PostRepository implements PostRepositoryInterface {
     async deletePost(postId : string):Promise<any> {
         try {
       
-            const deletePost = await PostModel.findByIdAndUpdate(postId, { isDeleted: true },{new:true});
-            if (deletePost) {
-                return { success: true,data:deletePost }
-            }
-        return {success:false,message:"Something went wrong"}
+          const post = await PostModel.findById(postId);
+        
+          if (!post) {
+              return { success: false, message: "Post not found" };
+          }
+          
+          const updatedPost = await PostModel.findByIdAndUpdate(
+              postId, 
+              { isDeleted: !post.isDeleted }, 
+              { new: true }
+          );
+  
+          return { success: true, data: updatedPost };
+        // return {success:false,message:"Something went wrong"}
            
         } catch (error) {
             console.log(error)

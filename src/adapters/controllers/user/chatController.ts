@@ -33,7 +33,7 @@ class chatController {
         const {id :receiverId} = req.params;
         const senderId = req.userId
         console.log(req.body.message)
-        const {text:message ,videoUrl,imageUrl} = req.body.message
+        const message= req.body.message
         
         const sendMessage = await this.chatUseCase.sendMessage(senderId as string,receiverId,message)
         if(sendMessage.success){
@@ -56,6 +56,7 @@ class chatController {
             throw new ApiError(400, 'Invalid user ID format');
         }
         const sendMessage = await this.chatUseCase.getMessage(senderId as string,userToChat)
+        // console.log("get messages",sendMessage)
         if(sendMessage.success){
         res.status(200).json(new ApiResponse(200,{chat: sendMessage.data}, 'Chat fetched successfully'));
 
@@ -67,10 +68,11 @@ class chatController {
     });
 
     getRecentChatedUsers = asyncHandlers(async (req: CustomRequest, res: Response) => {
-        console.log("get recent chats received ")
+        // console.log("get recent chats received ")
         const userId = req.userId
          
         const getUsers = await this.chatUseCase.getRecentChats(userId as string)
+        // console.log('recent chatys',getUsers)
         if(getUsers.success){
         res.status(200).json(new ApiResponse(200,{users: getUsers.data}, 'Recent chats fetched sucessfully'));
 
@@ -117,6 +119,58 @@ class chatController {
         }
 
     });
-   
+
+    findMessageById = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("delete message received ")
+        console.log(req.params)
+        const {id :messageId} = req.params;
+        const senderId = req.userId
+        console.log(req.body)
+
+        
+        const findMessage = await this.chatUseCase.findMessageById(messageId)
+        if(findMessage.success){
+         res.status(200).json(new ApiResponse(200,{message: findMessage.data}, 'Message fetched successfully'));
+        } else {
+            throw new ApiError(400, findMessage.message);
+        }
+
+    });
+
+    unReadedMessages = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("unreaded message received ")
+        console.log(req.params)
+        const {roomId} = req.params;
+        const userId = req.userId
+        const findMessage = await this.chatUseCase.unReadedMessages(roomId,userId as string)
+        console.log('message recet :',findMessage)
+        if(findMessage.success){
+         res.status(200).json(new ApiResponse(200,{messages: findMessage.data}, 'Message fetched successfully'));
+        } else {
+            throw new ApiError(400, findMessage.message);
+        }
+
+    });
+
+    markMessageAsRead = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("marka as read message received ")
+        console.log(req.params)
+        const {selectedUserId} = req.params;
+        const userId = req.userId
+
+        if ( !mongoose.Types.ObjectId.isValid(selectedUserId)) {
+            throw new ApiError(400, "Invalid user ID or selected user ID");
+            // return { success: false, message: "Invalid user ID or selected user ID" };
+          }
+        const updateMessage = await this.chatUseCase.markMessageAsRead(userId as string , selectedUserId as string)
+        console.log('update message  :',updateMessage)
+        if(updateMessage.success){
+         res.status(200).json(new ApiResponse(200,{}, 'Message marked as readed successfully'));
+        } else {
+            throw new ApiError(400, updateMessage.message);
+        }
+
+    });
+    
 }
 export default chatController 

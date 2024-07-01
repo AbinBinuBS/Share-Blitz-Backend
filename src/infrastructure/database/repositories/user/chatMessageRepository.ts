@@ -8,10 +8,10 @@ import { ChatMessageModel } from "../../models/ChatMessageModel";
 import ChatMessageRepositoryInterface from "../../../../domain/interface/repositories/user/messageRepository";
 class ChatMessageRepository implements ChatMessageRepositoryInterface {
 
-    async createNewMessage(senderId:string,receiverId:string,message:any):Promise<any> {
+    async createNewMessage(senderId:string,receiverId:string,message:{text?:string,imageUrl?:string,videoUrl?:string}):Promise<any> {
         try {
             let newMessage = new ChatMessageModel({
-                senderId,receiverId,text:message
+                senderId,receiverId,text:message.text,imageUrl:message.imageUrl,videoUrl:message.videoUrl
               })
              await newMessage.save()
             if(newMessage){
@@ -37,7 +37,30 @@ class ChatMessageRepository implements ChatMessageRepositoryInterface {
                 return { success: false, message: "Message not found or unauthorized" };
             }
             // Delete the message
-            const deletedMessage = await ChatMessageModel.findByIdAndDelete(messageId);
+            const deletedMessage = await ChatMessageModel.findByIdAndUpdate(messageId,{$set:{isDeleted:true}});
+    
+            if (!deletedMessage) {
+                return { success: false, message: "Failed to delete message" };
+            }
+    
+            return { success: true, data: deletedMessage };
+        } catch (error) {
+            console.error("Error deleting message:", error);
+            return { success: false, message: "Failed to delete message" };
+        }
+    } 
+    async  deleteMessageFromMe(senderId:string,receiverId:string,messageId:string):Promise<any> {
+        try {
+            // Find the message
+            const message = await ChatMessageModel.findOne({
+                _id: messageId,
+            });
+    
+            if (!message) {
+                return { success: false, message: "Message not found or unauthorized" };
+            }
+            // Delete the message
+            const deletedMessage = await ChatMessageModel.findByIdAndUpdate(messageId,{$set:{isDeletedFromMe:true}});
     
             if (!deletedMessage) {
                 return { success: false, message: "Failed to delete message" };
@@ -62,13 +85,29 @@ class ChatMessageRepository implements ChatMessageRepositoryInterface {
             }
 
             // Update the message
-            const updated = await ChatMessageModel.findByIdAndUpdate(messageId, { text: text }, { new: true });
+            const updated = await ChatMessageModel.findByIdAndUpdate(messageId, { text: text ,isEdited:true}, { new: true });
 
             if (!updated) {
                 return { success: false, message: "Failed to update message" };
             }
 
             return { success: true, data: updated };
+           
+        } catch (error) {
+            console.error("Error creating new message:", error);
+            return { success: false, message: "Failed to create new message" };
+        }
+    } 
+
+    async  findMessageById(messageId:string):Promise<any> {
+        try {
+            const message = await ChatMessageModel.findById(messageId);
+
+            if (!message) {
+                return { success: false, message: "Message not found or unauthorized" };
+            }
+ 
+            return { success: true, data: message };
            
         } catch (error) {
             console.error("Error creating new message:", error);

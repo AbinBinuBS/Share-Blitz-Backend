@@ -6,6 +6,7 @@ import userRoute from '../routes/user/userRoutes'
 import postRoute from '../routes/user/postRoute'
 import adminRoute from '../routes/user/adminRoute'
 import chatRoute from '../routes/user/chatRoute'
+import notificationRoute from '../routes/user/notificationRoute'
 import cors from 'cors';
 import socketConfiguration from '../Socket/socket'
 import { Server } from 'socket.io'
@@ -30,6 +31,7 @@ export const createServer = () => {
         app.use('/api/admin',adminRoute)
         app.use('/api/user',userRoute)
         app.use('/api/chat',chatRoute)
+        app.use('/api/notifications',notificationRoute)
         const server = http.createServer(app)
 
 

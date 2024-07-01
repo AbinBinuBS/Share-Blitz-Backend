@@ -295,7 +295,6 @@ class UserUseCase {
                    };
                   }
                   const hashedPassword = await this.hashPassword.createHash(email.trim())
-// console.log("......................................",findUser.password,email,hashedPassword)
                 let passwordMatch = await this.hashPassword.compare(email.trim(),findUser.password)
                 console.log('passsword match',passwordMatch)
                 if(!passwordMatch) { 

@@ -37,7 +37,7 @@ class ChatUseCase implements ChatUseCaseInterface {
         this.io = io; // Assign io
     }
 
-    async sendMessage(senderId : string,receiverId : string,message:any)  {
+    async sendMessage(senderId : string,receiverId : string,message:{text?:string,imageUrl?:string,videoUrl?:string})  {
        try {
             console.log("recieved message usecase") 
 
@@ -55,9 +55,13 @@ class ChatUseCase implements ChatUseCaseInterface {
                 const addNewMessageIdtoRoom = await this.roomRepository.addNewMessageId(findChatRoom?.room?._id,newMessage.message._id)
                 if(addNewMessageIdtoRoom){
                     const receiverSocketId = getReceiverSocketId(receiverId)
+                    const senderSocketId = getReceiverSocketId(senderId)
                     if(receiverSocketId) {
-                        io.to(receiverId).emit("newMessage",newMessage.message)
+                        io.to(receiverSocketId).emit("newMessage",newMessage.message)
                     }
+                    if(senderSocketId)
+                        io.to(senderSocketId).emit("messageSended",{})
+
                 }
                 return {success:true,data:newMessage.message}
             }
@@ -81,33 +85,51 @@ class ChatUseCase implements ChatUseCaseInterface {
         }
      }
     
-    async getRecentChats(userId : string) {
+     async getRecentChats(userId: string) {
         try {
-             console.log("recieved get message usecase") 
-             let findChatRoom = await this.roomRepository.getRecentChats(userId)
-             console.log('rooms ',findChatRoom)
-             if(findChatRoom?.success){
-             const userIds = new Set<string>();
-             findChatRoom.chatRooms.forEach((room: { participants: string[] }) => {
-                room.participants.forEach(participant => {
-                    if (participant.toString() != userId) {
-                        userIds.add(participant.toString());
-                    }
+            let findChatRoom = await this.roomRepository.getRecentChats(userId);
+    
+            if (findChatRoom?.success) {
+                const userIds = new Set<string>();
+                findChatRoom.chatRooms.forEach((room: { participants: string[] }) => {
+                    room.participants.forEach(participant => {
+                        if (participant.toString() !== userId) {
+                            userIds.add(participant.toString());
+                        }
+                    });
                 });
-            });
-             const userDetails = await this.userRepository.getUserDetailsFromArray(Array.from(userIds))
-             if(userDetails) {
-                return {success:true,data:userDetails}
-             }
-             return {success:false,message:"Something went wrong"}
-
-                   }
-             return {success:false,message:findChatRoom?.message}
-
+    
+                const userDetails = await this.userRepository.getUserDetailsFromArray(Array.from(userIds));
+                console.log('userDeails :',userDetails)
+                if (userDetails?.success) {
+                    // Combine chat rooms with user details
+                    const roomsWithUserDetails = findChatRoom.chatRooms.map((room: any) => {
+                      const participantsDetails = room.participants
+                            .filter((participant: any) => participant.toString() != userId)
+                            .map((participant: any) => userDetails.users.find((user: any) => user._id.toString() === participant.toString()))
+                            .filter((participant: any) => participant !== undefined); // Filter out undefined values
+    
+                        return {
+                            room,
+                            participantsDetails
+                        };
+                    }); 
+                    console.log('roomwith',roomsWithUserDetails)
+                    return { success: true, data: roomsWithUserDetails };
+                }
+    
+                return { success: false, message: "Something went wrong" };
+            }
+    
+            return { success: false, message: findChatRoom?.message };
         } catch (error) {
-           console.log(error)         
+            console.log(error);
+            return { success: false, message: 'Something went wrong' };
         }
-     }
+    }
+    
+    
+    
 
      async deleteMessage(senderId : string,receiverId : string,messageId:string)  {
         try {
@@ -162,7 +184,48 @@ class ChatUseCase implements ChatUseCaseInterface {
            console.log(error)         
         }
      }
-    
+
+     async findMessageById(messageId : string)  {
+        try {
+            
+             const findMessgage = await this.messageRepository.findMessageById(messageId );
+             if(findMessgage.success){
+                 return {success:true,data:findMessgage.data}
+             } 
+             return {success:false,message:findMessgage?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+
+     async unReadedMessages(roomId : string,userId:string)  {
+        try {
+            
+             const findMessgage = await this.roomRepository.unReadedMessages(roomId,userId );
+             if(findMessgage.success){
+                 return {success:true,data:findMessgage.data}
+             } 
+             return {success:false,message:findMessgage?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+
+     async markMessageAsRead(userId : string,selectedUserId:string)  {
+        try {
+            
+             const markAsRead = await this.roomRepository.markMessageAsRead(userId,selectedUserId );
+             if(markAsRead.success){
+                const receiverSocketId = getReceiverSocketId(userId)
+                io.to(receiverSocketId).emit("messagesMarkedAsRead",{})
+                 return {success:true,data:markAsRead.data}
+             } 
+             return {success:false,message:markAsRead?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+     
 }
 
 

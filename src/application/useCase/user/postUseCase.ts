@@ -117,10 +117,11 @@ class PostUseCase {
             console.log("unlike post in usecase")
              const post = await this.postRepository.findPostLikesByPostId(postId)
              console.log('Like :',post)
+             console.log('Like :',post.data.likes)
              if(!post.success){
                  return {success:false,message: "Like collection not found"}
              }
-             if (!post?.data?.likes.some((like: { userId: string }) => like.userId === userId)) {
+             if (!post?.data?.likes.some((like: { userId: string }) => like.userId == userId)) {
                 console.log("User has not liked this post");
                 return { success: false, message: "Post not liked by the user" };
             }
