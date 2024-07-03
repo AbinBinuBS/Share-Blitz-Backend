@@ -12,4 +12,5 @@ export interface adminUseCaseInterface {
     changeActionStatus(reportId : string) : Promise<any>
     getVerificationData(): Promise<any>
     approveVerificationRequest(id:string) :Promise<any>
+    dashboardCardsData():any
 }

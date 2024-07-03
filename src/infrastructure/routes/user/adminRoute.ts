@@ -1,5 +1,5 @@
 
-import express from "express"
+import express, { NextFunction } from "express"
 import postController from '../../../adapters/controllers/user/postController'
 import adminController from '../../../adapters/controllers/admin/adminController'
 import postRepository from '../../database/repositories/user/postRepository'
@@ -35,6 +35,11 @@ router.patch('/changeActionStatus',adminAuth, (req, res) => { controller.changeA
 router.patch('/approveVerificationRequest',adminAuth, (req, res) => { controller.approveVerificationRequest(req, res) });
 router.delete('/deletePost',adminAuth, (req, res) => { controller.deletePost(req, res) });
 router.get('/getVerificationData', adminAuth, (req, res) => { controller.getVerificationData(req, res) });
+
+//////////////////// Admin Dashboard  //////////////////////////////
+
+router.get('/dashboard/cardsData', adminAuth,(req, res,next :NextFunction) => { controller.cardsData(req, res,next) });
+
 
 
 

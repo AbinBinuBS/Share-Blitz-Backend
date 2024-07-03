@@ -186,6 +186,27 @@ class AdminUseCase implements adminUseCaseInterface {
          console.log(error) 
         }
      }
+
+     async dashboardCardsData()  {
+        try {
+            let userData 
+            let postData
+             const getUserData  = await this.userRepository.getAllUsers()
+             const postDataResponse = await this.postRepository.getAllPostsToAdmin()
+             if(postDataResponse.success){
+                postData = postDataResponse.data
+             }
+             if(getUserData.success){
+                userData = getUserData.data
+                //  userData = getUserData.data.filter((user)=>u)
+             } 
+             return {success:true,userData,postData}
+        } catch (error) {
+            console.log(error) 
+            return {success:false,message:"Failed to load cards data"}
+        }
+     }
+     
      
      
 }

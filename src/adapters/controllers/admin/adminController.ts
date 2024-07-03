@@ -3,6 +3,9 @@ import { Request , Response} from 'express'
 
 import { postRequestI } from '../../../application/useCase/interface/user/postUseCase';
 import { adminUseCaseInterface } from '../../../application/useCase/interface/admin/adminUseCaseInteface';
+import asyncHandlers from '../../../infrastructure/utils/handlers/asyncHandlers';
+import ApiResponse from '../../../infrastructure/utils/handlers/ApiResponse';
+import ApiError from '../../../infrastructure/utils/handlers/ApiError';
 class adminController {
     private adminUseCase : adminUseCaseInterface 
     constructor(adminUseCase : adminUseCaseInterface){
@@ -237,6 +240,22 @@ class adminController {
             console.log(error)
         }
     }
+
+
+    cardsData = asyncHandlers(async (req: Request, res: Response) => {
+        console.log("cards data  received ")
+        console.log(req.params)
+        const {roomId} = req.params;
+        // const userId = req.userId
+        const cardsData = await this.adminUseCase.dashboardCardsData()
+        // console.log('message recet :',cardsData)
+        if(cardsData.success){
+         res.status(200).json(new ApiResponse(200,{userData: cardsData.userData , postData:cardsData.postData}, 'Data fetched successfully'));
+        } else {
+            throw new ApiError(400, cardsData.message);
+        }
+
+    });
     
 
 }
