@@ -5,6 +5,7 @@ import PostInterface, { CreatePostRequestModel } from "../../../entities/post"
 interface PostRepositoryInterface {
     createPost(post: CreatePostRequestModel) : Promise <any>,
     getAllPosts(skip : number , limit : number) : Promise <any>,
+    getPostsByLimitToAdmin(skip:number,limit:number) : Promise <any>,
     getAllPostsToAdmin() : Promise <any>,
     getPostById(userId : string) : Promise <any>,
     getUserPosts(userId : string) : Promise <any>,

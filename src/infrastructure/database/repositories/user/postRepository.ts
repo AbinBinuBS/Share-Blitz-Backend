@@ -184,6 +184,64 @@ class PostRepository implements PostRepositoryInterface {
       }
   } 
     
+  
+  async getPostsByLimitToAdmin(skip:number,limit:number ) {
+    try {
+       
+    const postData = await PostModel.aggregate([
+       
+       
+        {
+          $lookup: {
+            from: 'likes', // the name of the Likes collection
+            localField: '_id',
+            foreignField: 'postId',
+            as: 'likesDetails'
+          }
+        },
+        {
+          $lookup: {
+            from: 'comments', // the name of the Comments collection
+            localField: '_id',
+            foreignField: 'postId',
+            as: 'commentsDetails'
+          }
+        },
+        {
+          $unwind: {
+            path: '$likesDetails',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $unwind: {
+            path: '$commentsDetails',
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+            $sort: {
+              creationTime: -1 
+            }
+        }
+        ,
+        {
+          $skip: skip
+        },
+        {
+            $limit: limit
+        }
+
+      ]);
+        if(postData)
+            return {success:true,data:postData}
+        return {success:false,message:"Something went wrong"}
+       
+    } catch (error) {
+        console.log(error)
+        return {message: 'something went wrong',success:false}
+    }
+} 
 
     async getPostById(postId : string) {
         try {
@@ -500,6 +558,7 @@ class PostRepository implements PostRepositoryInterface {
         try {
             const savePost = await SavedPostModel.findOneAndUpdate({userId}, { $push:{ savedPosts: {  postId } }},{upsert:true, new: true});
             if (savePost) {
+
                 return { success: true,data: savePost };
             }
         return {success:false,message:"Failed to save post"}
@@ -531,11 +590,12 @@ class PostRepository implements PostRepositoryInterface {
 
       async findSavedPostsById(userId:string):Promise<findSavedPostsByIdInterface> {
         try {
-            const savedPosts = await SavedPostModel.findOne({userId});
+            const savedPosts = await SavedPostModel.findOne({userId :new mongoose.Types.ObjectId(userId)});
             if (savedPosts) {
+
                 return { success: true,data: savedPosts };
             }
-        return {success:false,message:"Failed find posts"}
+        return {success:false,message:"Failed to find posts"}
            
         } catch (error) {
             console.log(error)

@@ -24,7 +24,7 @@ const controller = new adminController(adminCase)
 const router = express.Router()
 
 router.get('/getAllUsers', adminAuth,(req, res) => { controller.getAllUsers(req, res) });
-router.get('/getAllPosts', adminAuth,(req, res) => { controller.getAllPosts(req, res) });
+router.get('/getAllPosts/:page', adminAuth,(req, res) => { controller.getAllPosts(req, res) });
 router.get('/getUserById', (req, res) => { controller.getUser(req, res) });
 router.get('/getAllReportedPosts', adminAuth, (req, res) => { controller.getAllReportedPosts(req, res) });
 router.get('/getReportsByPostId', adminAuth, (req, res) => { controller.getReportsByPostId(req, res) });

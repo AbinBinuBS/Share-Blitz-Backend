@@ -13,6 +13,7 @@ import MessageRepositoryInterface from "../../../domain/interface/repositories/u
 import { getReceiverSocketId } from "../../../infrastructure/Socket/socket";
 import { io } from "../../..";
 import ChatUseCaseInterface from "../interface/user/chatUseCaseInterface";
+import { Console } from "console";
 class ChatUseCase implements ChatUseCaseInterface {
     private userRepository: UserRepositoryInterface;
     private roomRepository : RoomRepositoryInterface;
@@ -37,7 +38,7 @@ class ChatUseCase implements ChatUseCaseInterface {
         this.io = io; // Assign io
     }
 
-    async sendMessage(senderId : string,receiverId : string,message:{text?:string,imageUrl?:string,videoUrl?:string})  {
+    async sendMessage(roomId:string,senderId : string,receiverId : string,message:{text?:string,imageUrl?:string,videoUrl?:string})  {
        try {
             console.log("recieved message usecase") 
 
@@ -69,12 +70,57 @@ class ChatUseCase implements ChatUseCaseInterface {
        } catch (error) {
           console.log(error)         
        }
-    }
+    } 
+    async sendGroupMessage(roomId:string,senderId : string,message:{text?:string,imageUrl?:string,videoUrl?:string})  {
+        try {
+             console.log("recieved message usecase") 
+ 
+            let findChatRoom = await this.roomRepository.findChatRoomById(roomId)
+             if(!findChatRoom?.room)
+                 return {success:false,message:"Failed to create or find the room"}
+             const newMessage = await this.messageRepository.createGroupChatMessage(senderId,message)
+             console.log(newMessage)
+             if(newMessage.success){
+                 const addNewMessageIdtoRoom = await this.roomRepository.addNewMessageId(findChatRoom?.room?._id,newMessage.message._id)
+                 if(addNewMessageIdtoRoom){
+                    findChatRoom?.room?.participants.forEach((participantId : string) => {
 
+                        const receiverSocketId = getReceiverSocketId(participantId)
+                        if(receiverSocketId) {
+                            io.to(receiverSocketId).emit("newGroupMessage",{message:newMessage.message,roomId})
+                        }
+                    })
+                     const senderSocketId = getReceiverSocketId(senderId)
+                     if(senderSocketId)
+                         io.to(senderSocketId).emit("messageSended",{})
+ 
+                 }
+                 return {success:true,data:newMessage.message}
+             }
+             return {success:false,message:newMessage.message}
+        } catch (error) {
+           console.log(error)         
+        }
+     }
+    
     async getMessage(senderId : string,userToChat :string)  {
         try {
              console.log("recieved get message usecase") 
              let findChatRoom = await this.roomRepository.getAllMessages(senderId,userToChat)
+             console.log('messages',findChatRoom)
+             if(findChatRoom?.success){
+             return {success:true,data:findChatRoom.room}
+             }
+             return {success:false,message:findChatRoom?.message}
+ 
+        } catch (error) {
+           console.log(error)         
+        }
+     }
+     async getMessagesByRoom(roomId :string)  {
+        try {
+             console.log("recieved get message usecase") 
+             let findChatRoom = await this.roomRepository.getMessagesByRoom(roomId)
              if(findChatRoom?.success){
              return {success:true,data:findChatRoom.room}
              }
@@ -100,7 +146,7 @@ class ChatUseCase implements ChatUseCaseInterface {
                 });
     
                 const userDetails = await this.userRepository.getUserDetailsFromArray(Array.from(userIds));
-                console.log('userDeails :',userDetails)
+                // console.log('userDeails :',userDetails)
                 if (userDetails?.success) {
                     // Combine chat rooms with user details
                     const roomsWithUserDetails = findChatRoom.chatRooms.map((room: any) => {
@@ -129,7 +175,7 @@ class ChatUseCase implements ChatUseCaseInterface {
     }
     
     
-    
+       
 
      async deleteMessage(senderId : string,receiverId : string,messageId:string)  {
         try {
@@ -143,14 +189,14 @@ class ChatUseCase implements ChatUseCaseInterface {
              const deleteMessage = await this.messageRepository.deleteMessage(senderId,receiverId,messageId)
              console.log(deleteMessage)
              if(deleteMessage.success){
-                 const removeMessageIdtoRoom = await this.roomRepository.removeMessageId(findChatRoom?.room?._id,deleteMessage.data._id)
-                 if(removeMessageIdtoRoom){
+                //  const removeMessageIdtoRoom = await this.roomRepository.removeMessageId(findChatRoom?.room?._id,deleteMessage.data._id)
+                //  if(removeMessageIdtoRoom){
                      const receiverSocketId = getReceiverSocketId(receiverId)
                      if(receiverSocketId) {
                         console.log('delete',deleteMessage.data)
                          io.to(receiverId).emit("deletedMessage",messageId)
                      }
-                 }
+                //  }
                  return {success:true,data:deleteMessage.data}
              }
              return {success:false,message:deleteMessage.message}
@@ -225,6 +271,25 @@ class ChatUseCase implements ChatUseCaseInterface {
          console.log(error)         
         }
      }
+
+
+     async  createGroupChat(userId:string,groupName : string ,participants : string[])   {
+        try {
+            
+             const createGroupChat = await this.roomRepository.createGroupChat(userId,groupName,participants);
+             console.log('crate group chat useCase ',createGroupChat)
+             if(createGroupChat.success){
+                const receiverSocketId = getReceiverSocketId(userId)
+                io.to(receiverSocketId).emit("newGroupChatCreated",{})
+                 return {success:true,data:createGroupChat?.data}
+             } 
+             return {success:false,message:createGroupChat?.message}
+        } catch (error) {
+         console.log(error)         
+        }
+     }
+
+   
      
 }
 

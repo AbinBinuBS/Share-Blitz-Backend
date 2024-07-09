@@ -1,7 +1,7 @@
 import User from "../../../../domain/interface/repositories/user/userInterface"
 export interface adminUseCaseInterface {
     getAllUsers():any
-    getAllPosts():any
+    getAllPosts(page:string):any
     toogleUserStatus(userId:string):any
     tooglePostIsBlocked(postId : string):any,
     getAllReportedPosts():any,

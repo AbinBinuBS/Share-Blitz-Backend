@@ -14,6 +14,7 @@ import ApiError from "../../../infrastructure/utils/handlers/ApiError";
 import UserModel from "../../../infrastructure/database/models/userModel";
 import ApiResponse from "../../../infrastructure/utils/handlers/ApiResponse";
 import { generateAccessAndRefreshTokens } from "../../../domain/services/TokenGeneration";
+import mongoose from "mongoose";
 
 
 class userController {
@@ -198,9 +199,13 @@ class userController {
     }
     async getUser (req : Request ,res:Response) {
         try {
-            // console.log("Get user worked in controller")
+            console.log("Get user worked in controller")
             // console.log(req.query)
             const {userId} = req.query
+            if (!mongoose.Types.ObjectId.isValid(userId as string) ) {
+                return res.status(400).json({ success: false, message: "Invalid user id" });
+
+            }
             const userData = await this.userCase.getUser(userId as string)
             // console.log(userData)
             if(!userData?.success)

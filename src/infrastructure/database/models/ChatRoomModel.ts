@@ -17,7 +17,7 @@ const ChatRoomSchema = new Schema<IChat>(
   {
     name: {
       type: String,
-      default:"hello",
+      default:"Chat Room",
       required: true,
     },
     isGroupChat: {
@@ -28,7 +28,6 @@ const ChatRoomSchema = new Schema<IChat>(
       type: Schema.Types.ObjectId,
       ref: "ChatMessage",
     },
-   
     participants: [
       {
         type: Schema.Types.ObjectId,

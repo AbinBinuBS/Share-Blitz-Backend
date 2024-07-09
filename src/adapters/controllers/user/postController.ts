@@ -2,6 +2,7 @@ import { Request , Response} from 'express'
 // import postUseCase from '../../../application/useCase/user/postUseCase'
 import { postRequestI } from '../../../application/useCase/interface/user/postUseCase';
 import { CustomRequest } from '../../../domain/interface/controllers/userControllerInterface';
+import mongoose from 'mongoose';
 
 class postController {
     private postUseCase : any 
@@ -113,6 +114,10 @@ class postController {
             const userId = req.userId
             if(!postId || !userId){
                 return res.status(400).json({ success: false, message: "Missing postId or userId" });
+            }
+            if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+                return res.status(400).json({ success: false, message: "Invalid postId or userId" });
+
             }
             const likePost = await this.postUseCase.likePost(postId as string , userId as string)
             console.log('response like post contoller :',likePost)
@@ -321,6 +326,10 @@ class postController {
         try {
            
             const userId = req.userId 
+            if (!mongoose.Types.ObjectId.isValid(userId as string) ) {
+                return res.status(400).json({ success: false, message: "Invalid userId" });
+
+            }
             const savedPosts = await this.postUseCase.getSavedPostsById(userId)
             // console.log("get saved posts :",savedPosts)
             if(savedPosts.success){

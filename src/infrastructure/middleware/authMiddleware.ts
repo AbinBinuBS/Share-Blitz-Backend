@@ -9,6 +9,7 @@ import ApiError from "../utils/handlers/ApiError";
 const userRepository = new UserRepository()
 const jwt = new JWTtoken()
 import JWT,{JwtPayload} from 'jsonwebtoken'
+import mongoose from "mongoose";
 
 // import jwt,{JwtPayload} from 'jsonwebtoken'
 
@@ -107,12 +108,15 @@ export const adminAuth1 = async (req: CustomRequest, res: Response, next: NextFu
 
 
     // console.log(decodedToken)       
+    if (!mongoose.Types.ObjectId.isValid(decodedToken?.id) ) {
+        throw new ApiError(401,"Invalid user id ")
 
+    }
     const userData: UserWithoutCredential | null = await userRepository.getUserById(decodedToken?.id);
     // console.log("user data ",userData)
 
     if(!userData) {
-     throw new ApiError(401,) 
+     throw new ApiError(401,"user not found") 
      }
      req.userId = userData._id
      next()

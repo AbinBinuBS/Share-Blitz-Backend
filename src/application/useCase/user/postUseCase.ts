@@ -116,8 +116,6 @@ class PostUseCase {
         try {
             console.log("unlike post in usecase")
              const post = await this.postRepository.findPostLikesByPostId(postId)
-             console.log('Like :',post)
-             console.log('Like :',post.data.likes)
              if(!post.success){
                  return {success:false,message: "Like collection not found"}
              }
@@ -230,7 +228,7 @@ class PostUseCase {
 
      async savePost(userId:string,postId : string)  {
         try {
-            console.log("save post in usecase")
+            console.log("save post in usecase i")
             const savedPosts = await this.postRepository.findSavedPostsById(userId);
             if (savedPosts && savedPosts.success && savedPosts.data?.savedPosts.some((post: { postId : any }) => post.postId.toString() == postId)) {
               console.log("User already saved the post");
@@ -260,7 +258,6 @@ class PostUseCase {
             }
     
             if (!savedPosts.data?.savedPosts.some((post: { postId: any }) => post.postId.toString() === postId)) {
-                console.log("Post is not saved by the user");
                 return { success: false, message: "Post is not saved by the user" };
             }
     
@@ -279,16 +276,16 @@ class PostUseCase {
 
      async getSavedPostsById(userId:string)  {
         try {
-            console.log("save post in usecase")
             const savedPosts = await this.postRepository.findSavedPostsById(userId);
             if (!savedPosts.success ) {
+
               return { success: false, message: "Failed to load savedPosts" };
             }
            
 
              return {success:true,data:savedPosts.data}
           
-
+ 
         } catch (error) {
          console.log(error)
         } 

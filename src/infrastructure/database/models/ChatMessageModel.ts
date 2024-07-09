@@ -26,7 +26,7 @@ const chatMessageSchema = new Schema<IChatMessage>(
     receiverId: {
       type: Schema.Types.ObjectId,
       ref: "UserModel",
-      required: true,
+      required: false, // true
     },
   
     text: {

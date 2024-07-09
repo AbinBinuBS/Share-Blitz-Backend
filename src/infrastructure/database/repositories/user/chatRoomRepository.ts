@@ -45,10 +45,10 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
                 return {success:false,message:"Room not exist"}
             }
         
-            // Find messages in the chat room that are not seen
             const unseenMessages = await ChatMessageModel.find({
               _id: { $in: chatRoom.messages },
-              receiverId:userId,
+            //   receiverId:userId,
+            senderId:{$ne:userId},
               seen: false,
             }).exec();
             
@@ -63,7 +63,7 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
     async createChatRoom(senderId:string,receiverId:string):Promise<any> {
         try {
             const createRoom = new ChatRoomModel({
-                name:"abhilash",
+                // name:"abhilash",
                 participants:[senderId,receiverId]
                 // admin:data.sender
               })
@@ -122,6 +122,18 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
            
            if(chatRoom)
             return {success:true,room:chatRoom}  
+           return {success:true,room:[]}             
+        } catch (error) {
+            console.log(error)
+            return {success: false}
+        }
+    }
+    async getMessagesByRoom(roomId:string):Promise<any> {
+        try {
+           const chatRoom = await ChatRoomModel.findById(roomId).populate("messages")
+           
+           if(chatRoom)
+            return {success:true,room:chatRoom}  
            return {success:true,room:[]}  
 
            return {success:false,message:"No room found"}        
@@ -163,6 +175,27 @@ class ChatRoomRepository implements ChatRoomRepositoryInterface {
         } catch (error) {
             console.log(error)
             return {success: false}
+        }
+    }
+
+    async createGroupChat(userId:string,groupName:string,participants:string[]):Promise<any> {
+        try {
+            const createRoom = new ChatRoomModel({
+                name:groupName,
+                isGroupChat:true,
+                participants:participants,
+                admin:userId
+              })
+             const Room =await createRoom.save()
+            if(Room){
+                return {success:true,data:Room}
+            }
+            
+            return {success:false,message:"Failed to create Room"}
+           
+        } catch (error) {
+            console.error("Error creating chat room:", error);
+            return { success: false, message: "Failed to create room" };
         }
     }
      

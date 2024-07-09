@@ -26,6 +26,24 @@ class ChatMessageRepository implements ChatMessageRepositoryInterface {
         }
     } 
 
+    async createGroupChatMessage(senderId:string,message:{text?:string,imageUrl?:string,videoUrl?:string}):Promise<any> {
+        try {
+            let newMessage = new ChatMessageModel({
+                senderId,text:message.text,imageUrl:message.imageUrl,videoUrl:message.videoUrl
+              })
+             await newMessage.save()
+            if(newMessage){
+                return {success:true,message:newMessage}
+            }
+            
+            return {success:false,message:"Room not exist"}
+           
+        } catch (error) {
+            console.error("Error creating new message:", error);
+            return { success: false, message: "Failed to create new message" };
+        }
+    } 
+
     async  deleteMessage(senderId:string,receiverId:string,messageId:string):Promise<any> {
         try {
             // Find the message

@@ -33,6 +33,10 @@ router.patch('/messages/editMessage',userAuth,(req, res,next:NextFunction) => { 
 router.patch('/messages/markAsRead/:selectedUserId',userAuth,(req, res,next:NextFunction) => { controller.markMessageAsRead(req, res,next) });
 router.get('/messages/unReadedMessages/:roomId',userAuth,(req, res,next:NextFunction) => { controller.unReadedMessages(req, res,next) });
 
+router.post('/groupChat',userAuth,(req, res,next:NextFunction) => { controller.CreateGroupChat(req, res,next) });
+router.post('/groupMessage/:roomId',userAuth,(req, res,next:NextFunction) => { controller.SendGroupMessage(req, res,next) });
+router.get('/messages/getAllMessagesByRoom/:roomId',userAuth,(req, res,next:NextFunction) => { controller.GetMessagesByRoom(req, res,next) });
+router.patch('/groupChat/removeParticipants',userAuth,(req, res,next:NextFunction) => { controller.RemoveParticipantsFromGroupChat(req, res,next) });
 
 
 

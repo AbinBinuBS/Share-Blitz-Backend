@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 async function getMongoDS() {
+        
     try {
         await mongoose.connect(`${process.env.MONGODB_URL}`);
         console.log('MongoDB database connection established successfully 🚀');

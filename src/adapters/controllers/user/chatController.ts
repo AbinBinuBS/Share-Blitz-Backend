@@ -34,8 +34,26 @@ class chatController {
         const senderId = req.userId
         console.log(req.body.message)
         const message= req.body.message
+        const roomId = req.body.roomId
         
-        const sendMessage = await this.chatUseCase.sendMessage(senderId as string,receiverId,message)
+        const sendMessage = await this.chatUseCase.sendMessage(roomId as string,senderId as string,receiverId,message)
+        if(sendMessage.success){
+        res.status(200).json(new ApiResponse(200,{message: sendMessage.data}, 'Message send successfully'));
+
+        } else {
+            throw new ApiError(400, sendMessage.message);
+
+        }
+
+    });
+    SendGroupMessage = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("send group message received ")
+        const {roomId} = req.params;
+        const senderId = req.userId
+        const message= req.body.message
+        
+        const sendMessage = await this.chatUseCase.sendGroupMessage(roomId as string,senderId as string,message)
+        // console.log("response ",sendMessage)
         if(sendMessage.success){
         res.status(200).json(new ApiResponse(200,{message: sendMessage.data}, 'Message send successfully'));
 
@@ -64,7 +82,26 @@ class chatController {
             throw new ApiError(400, sendMessage.message);
 
         }
+    });
 
+    GetMessagesByRoom = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("get message received ")
+        console.log(req.params.id)
+        const {roomId } = req.params;
+        const senderId = req.userId
+           // Validate the ObjectId
+           if (!mongoose.Types.ObjectId.isValid(roomId)) {
+            throw new ApiError(400, 'Invalid room ID format');
+        }
+        const getMessages = await this.chatUseCase.getMessagesByRoom(roomId)
+        console.log("get messages by room :",getMessages)
+        if(getMessages.success){
+        res.status(200).json(new ApiResponse(200,{chat: getMessages.data}, 'Chat fetched successfully'));
+
+        } else {
+            throw new ApiError(400, getMessages.message);
+
+        }
     });
 
     getRecentChatedUsers = asyncHandlers(async (req: CustomRequest, res: Response) => {
@@ -72,7 +109,7 @@ class chatController {
         const userId = req.userId
          
         const getUsers = await this.chatUseCase.getRecentChats(userId as string)
-        // console.log('recent chatys',getUsers)
+        console.log('recent chatys',getUsers)
         if(getUsers.success){
         res.status(200).json(new ApiResponse(200,{users: getUsers.data}, 'Recent chats fetched sucessfully'));
 
@@ -143,7 +180,6 @@ class chatController {
         const {roomId} = req.params;
         const userId = req.userId
         const findMessage = await this.chatUseCase.unReadedMessages(roomId,userId as string)
-        console.log('message recet :',findMessage)
         if(findMessage.success){
          res.status(200).json(new ApiResponse(200,{messages: findMessage.data}, 'Message fetched successfully'));
         } else {
@@ -163,7 +199,6 @@ class chatController {
             // return { success: false, message: "Invalid user ID or selected user ID" };
           }
         const updateMessage = await this.chatUseCase.markMessageAsRead(userId as string , selectedUserId as string)
-        console.log('update message  :',updateMessage)
         if(updateMessage.success){
          res.status(200).json(new ApiResponse(200,{}, 'Message marked as readed successfully'));
         } else {
@@ -171,6 +206,56 @@ class chatController {
         }
 
     });
+
+    CreateGroupChat = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("group chat received ")
+        console.log(req.body)
+        const {groupName,participants} = req.body;
+        const userId = req.userId
+
+        if(!groupName || !participants) {
+            throw new ApiError(200,'Group name and participants required')
+        }
+        participants.push(userId)
+        participants.forEach((userId : string ) => {
+            if ( !mongoose.Types.ObjectId.isValid(userId)) {
+                throw new ApiError(400, "Invalid participants ID ");
+              }
+        }); 
+        const createGroupChat = await this.chatUseCase.createGroupChat(userId as string,groupName as string , participants as string[])
+        if(createGroupChat.success){
+         res.status(200).json(new ApiResponse(200,{}, 'Group chat created successfully'));
+        } else {
+            throw new ApiError(400, createGroupChat?.message);
+        }
+
+    });
+
+    RemoveParticipantsFromGroupChat = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("remove participants received ")
+        console.log(req.body)
+        // const {groupName,participants} = req.body;
+        // const userId = req.userId
+
+        // if(!groupName || !participants) {
+        //     throw new ApiError(200,'Group name and participants required')
+        // }
+        // participants.push(userId)
+        // participants.forEach((userId : string ) => {
+        //     if ( !mongoose.Types.ObjectId.isValid(userId)) {
+        //         throw new ApiError(400, "Invalid participants ID ");
+        //       }
+        // }); 
+        // const createGroupChat = await this.chatUseCase.createGroupChat(userId as string,groupName as string , participants as string[])
+        // console.log('create group chat  :',createGroupChat)
+        // if(createGroupChat.success){
+        //  res.status(200).json(new ApiResponse(200,{}, 'Group chat created successfully'));
+        // } else {
+        //     throw new ApiError(400, createGroupChat?.message);
+        // }
+
+    });
+    
     
 }
 export default chatController 
