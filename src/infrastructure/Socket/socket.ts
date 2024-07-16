@@ -70,20 +70,34 @@ const socketConfiguration =async (io: Server<DefaultEventsMap>) => {
     }) 
 
     //////////////// VIDEO CALL///////////////////
-    
-    socket.on('callUser', ({ userToCall, signalData, from, name }) => {
-      console.log(' call user received ',userToCall,from ,name)
-      const receiverSocketId = getReceiverSocketId(userToCall);
+     
+    socket.on('callUser', ({to,roomId}) => {
+      console.log(' call user received ',roomId,to)
+      const receiverSocketId = getReceiverSocketId(to);
 
-      io.to(receiverSocketId).emit('callFromUser', { signal: signalData, from, name })
+      io.to(receiverSocketId).emit('callFromUser', { roomId: roomId, from : userId })
     });
 
     socket.on('answerCall', (data) => {
       console.log("answered call",data.to)
       const receiverSocketId = getReceiverSocketId(data.to);
 
-        io.to(receiverSocketId).emit('answeredCall', data.signal);
+        io.to(receiverSocketId).emit('answeredCall',{ to:data.to});
     });
+
+    // socket.on('callUser', ({ userToCall, signalData, from, name }) => {
+    //   console.log(' call user received ',userToCall,from ,name)
+    //   const receiverSocketId = getReceiverSocketId(userToCall);
+
+    //   io.to(receiverSocketId).emit('callFromUser', { signal: signalData, from, name })
+    // });
+
+    // socket.on('answerCall', (data) => {
+    //   console.log("answered call",data.to)
+    //   const receiverSocketId = getReceiverSocketId(data.to);
+
+    //     io.to(receiverSocketId).emit('answeredCall', data.signal);
+    // });
     socket.on('callEnded', (data) => {
       console.log(" call ended",data)
       const receiverSocketId = getReceiverSocketId(data.userId);
@@ -102,9 +116,9 @@ const socketConfiguration =async (io: Server<DefaultEventsMap>) => {
         delete userSocketMap[userId];
       }
        io.emit("getOnlineUsers",Object.keys(userSocketMap))
-  
-    });
    
+    });
+    
   }); 
 
 };

@@ -7,7 +7,7 @@ async function getMongoDS() {
         return
     } catch (error) {
         console.error('MongoDB connection error:', error);
-        throw error;
-    }
+        throw error; 
+    }   
 }  
 export default  getMongoDS
