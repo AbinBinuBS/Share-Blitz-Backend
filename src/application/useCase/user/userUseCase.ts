@@ -51,7 +51,7 @@ class UserUseCase {
     async VerifyOtp(token : string,otp:Otp)  {
         try {
              console.log('verify otp worked in repo :',otp)
-             let decodedToken = this.jwtToken.verifyJwt(token)
+             let decodedToken = this.jwtToken.verifyOtp(token)
              console.log('verify otp decodedtoken :',decodedToken)
              if(decodedToken){
                 const { user, otpExpiration } = decodedToken;
@@ -104,7 +104,8 @@ class UserUseCase {
                 { expiresIn: "5m" }
               );
               console.log('token',token)
-              let decodeToken = this.jwtToken.verifyJwt(token)
+            //   let decodeToken = this.jwtToken.verifyJwt(token)
+              let decodeToken = this.jwtToken.verifyOtp(token)
               console.log('decoded token',decodeToken)
 
             return {success:true,data:{data:false,token:token},userExists:false}

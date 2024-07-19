@@ -16,7 +16,7 @@ const userRepo = new userRepository()
 const verificationRepo = new VerificationRepository()
 const connectionRepo = new ConnectionRepository()
 
-const jwt = new JWTtoken
+const jwt = new JWTtoken()
 const hashedPassword = new hashPassword()
 
 const userCase = new UserUseCase(userRepo,verificationRepo,connectionRepo,jwt,hashedPassword)
