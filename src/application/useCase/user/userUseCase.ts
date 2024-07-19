@@ -16,20 +16,25 @@ import sendEmail from "../../../infrastructure/utils/helpers/NodeMailer";
 import { VerificationRepositoryInterface } from "../../../domain/interface/repositories/user/verificationRepositoryInterface";
 import { generateAccessAndRefreshTokens } from "../../../domain/services/TokenGeneration";
 import ApiError from "../../../infrastructure/utils/handlers/ApiError";
+import ConnectionRepository from "../../../infrastructure/database/repositories/user/connectionRepository";
+import ConnectionRepositoryInterface from "../../../domain/interface/repositories/user/connectionRepositoryInterface";
 class UserUseCase {
     private userRepository: UserRepositoryInterface;
     private verificationRepository :VerificationRepositoryInterface
+    private connectionRepository : ConnectionRepositoryInterface
     private jwtToken : IJwtToken
     private hashPassword :HashPasswordInterface
 
     constructor(
         userRepository: UserRepositoryInterface,
         verificationRepository: VerificationRepositoryInterface,
+        connectionRepository:ConnectionRepositoryInterface,
         jwtToken :IJwtToken,
         hashedPassword:HashPasswordInterface
     )  {
         this.userRepository = userRepository;
         this.verificationRepository = verificationRepository;
+        this.connectionRepository = connectionRepository
         this.jwtToken = jwtToken;
         this.hashPassword = hashedPassword;
     }
@@ -443,6 +448,32 @@ class UserUseCase {
         } catch (error) {
          console.log(error)
         } 
+     }
+
+     async suggestedUsers(userId:string )  {
+        try {
+            // Get the current user's data
+            const currentUser = await this.connectionRepository.findConnectionsById(userId);
+            if (!currentUser.success) {
+                return { success: false, message: 'User not found' };
+            }
+            const followers = currentUser.data.followings.map((follower: {userId:string}) => follower.userId);
+            // const followings = currentUser.followings.map((following: any) => following.userId);
+            // console.log("followers ",followers)
+            const friends = new Set([...followers, userId]);
+            // console.log("friends ",friends)
+            // Get all users
+            const allUsers = await this.userRepository.getAllUsers();
+            
+            // Filter out the friends from the allUsers list
+            if(!allUsers?.data) return 
+            const suggestedUsers = allUsers?.data.filter((user: any) => !friends.has(user._id.toString()));
+            // console.log("suggested users ",suggestedUsers.length)
+            return { success: true, data: suggestedUsers };
+            } catch (error) {
+            console.log(error);
+            return { success: false, message: 'An error occurred' };
+            }
      }
      
 }

@@ -20,17 +20,18 @@ const jwt = new JWTtoken()
 const hashedPassword = new hashPassword()
 
 const postCase = new PostUseCase(postRepo,jwt,hashedPassword)
-const userCase = new UserUseCase(userRepo,verificationRepo,jwt,hashedPassword)
+const userCase = new UserUseCase(userRepo,verificationRepo,connectionRepo,jwt,hashedPassword)
 const connectionUseCase = new ConnectionUseCase(postRepo,userRepo,connectionRepo,jwt,hashedPassword)
 const controller = new userController(connectionUseCase,userCase) 
 
 const router = express.Router()
-
+   
 
 router.post('/followUser',userAuth, (req, res) => { controller.followUser(req, res) });
 router.delete('/unFollowUser',userAuth, (req, res) => { controller.unFollowUser(req, res) });
 router.get('/getConnections',userAuth, (req, res) => { controller.getConnections(req, res) });
 router.get('/checkIsFriend',userAuth, (req, res) => { controller.checkIsFriend(req, res) });
+router.get('/suggestedUsers',userAuth, (req, res) => { controller.suggestedUsers(req, res) });
 router.get('/searchUser',userAuth, (req, res) => { controller.searchUser(req, res) });
 router.patch('/changePrivacy',userAuth, (req, res) => { controller.changePrivacy(req, res) });
 

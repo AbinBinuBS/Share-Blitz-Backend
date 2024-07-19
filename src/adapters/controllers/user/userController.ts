@@ -1,5 +1,4 @@
 import { Request , Response} from 'express'
-import { postRequestI } from '../../../application/useCase/interface/user/postUseCase';
 import { CustomRequest } from '../../../domain/interface/controllers/userControllerInterface';
 import asyncHandlers from '../../../infrastructure/utils/handlers/asyncHandlers';
 import ApiError from '../../../infrastructure/utils/handlers/ApiError';
@@ -30,10 +29,7 @@ class userController {
 
     async followUser (req:CustomRequest ,res:Response) {
         try {
-            // const userId = req.userId
-            console.log(req?.user)
-            console.log(req?.userId)
-            console.log(req?.body)
+
             const userId = req?.userId
             const {targetId} = req.body
             if(!userId || !targetId) 
@@ -131,9 +127,7 @@ class userController {
 
     async changePrivacy (req:CustomRequest ,res:Response) {
         try {
-            // const userId = req.userId
-            // console.log("changePrivacy worked")
-        
+ 
             const userId = req?.userId
             if(!userId ) 
                 return res.status(409).json({success:false,message:"UserId is required"})
@@ -151,9 +145,7 @@ class userController {
 
     async isRequestedVerification (req:CustomRequest ,res:Response) {
         try {
-            // const userId = req.userId
-            // console.log("is requested verification worked")
-        
+
             const userId = req?.userId
             if(!userId ) 
                 return res.status(409).json({success:false,message:"UserId is required"})
@@ -171,9 +163,7 @@ class userController {
 
     async submitVerification (req:CustomRequest ,res:Response) {
         try {
-            // const userId = req.userId
-            // console.log("submit verification worked")
-            // console.log(req.body)
+
             const {idUrl} = req.body
             const userId = req?.userId
             if(!userId ) 
@@ -192,9 +182,7 @@ class userController {
 
     async updatePaymentDetails (req:CustomRequest ,res:Response) {
         try {
-            // const userId = req.userId
-            // console.log("update payment details worked")
-            // console.log(req.body)
+        
             const {plan,paymentId} = req.body
             const userId = req?.userId
             if(!userId ) 
@@ -213,6 +201,25 @@ class userController {
             console.log(error)
         }
     }
+    async suggestedUsers (req:CustomRequest ,res:Response) {
+        try {
+         
+          
+            const userId = req?.userId
+            if(!userId ) 
+                return res.status(409).json({success:false,message:"UserId is required"})
+            const suggestedUsers = await this.userUseCase.suggestedUsers(userId as string )
+            if(suggestedUsers.success){
+                    return res.status(200).json({success:true,users:suggestedUsers.data})
+            } else {
+                return res.status(409).json({success:false,message:suggestedUsers?.message})
+            }
+        } catch (error ){
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+    
    
 }
 export default userController 

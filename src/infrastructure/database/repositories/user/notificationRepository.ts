@@ -25,7 +25,7 @@ class NotificationRepository implements NotificationRepositoryInterface {
     
    async  getAllNotifications(userId:string){
     try {
-       const notifications = await NotificationModel.find({userId})
+       const notifications = await NotificationModel.find({userId}).sort({ createdAt: -1 });
         if(notifications)
             return {success:true,data:notifications}
         return {success:false,message:"Failed to get notification"}

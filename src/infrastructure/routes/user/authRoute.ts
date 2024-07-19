@@ -11,12 +11,15 @@ import { RequestWithUserId } from "../../../domain/interface/controllers/userCon
 import userAuth from "../../middleware/authMiddleware"
 import VerificationRepository from "../../database/repositories/user/verificationRepository"
 import { refreshAccessTokens } from "../../../domain/services/TokenGeneration"
+import ConnectionRepository from "../../database/repositories/user/connectionRepository"
 const userRepo = new userRepository()
 const verificationRepo = new VerificationRepository()
+const connectionRepo = new ConnectionRepository()
+
 const jwt = new JWTtoken
 const hashedPassword = new hashPassword()
 
-const userCase = new UserUseCase(userRepo,verificationRepo,jwt,hashedPassword)
+const userCase = new UserUseCase(userRepo,verificationRepo,connectionRepo,jwt,hashedPassword)
 const controller = new userController(userCase)
 
 const router = express.Router() 
