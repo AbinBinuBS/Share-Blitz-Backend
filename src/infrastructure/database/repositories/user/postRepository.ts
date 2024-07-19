@@ -132,7 +132,6 @@ class PostRepository implements PostRepositoryInterface {
      
       const postData = await PostModel.aggregate([
          
-         
           {
             $lookup: {
               from: 'likes', // the name of the Likes collection
@@ -185,12 +184,15 @@ class PostRepository implements PostRepositoryInterface {
   } 
     
   
-  async getPostsByLimitToAdmin(skip:number,limit:number ) {
+  async getPostsByLimitToAdmin(skip:number,limit:number,searchInput:string ) {
     try {
        
-    const postData = await PostModel.aggregate([
-       
-       
+      const searchQuery = searchInput ? { caption: { $regex: searchInput, $options: 'i' } } : {}; // Case-insensitive search
+
+      const postData = await PostModel.aggregate([
+          {
+              $match: searchQuery // Match documents based on the search query
+          },
         {
           $lookup: {
             from: 'likes', // the name of the Likes collection

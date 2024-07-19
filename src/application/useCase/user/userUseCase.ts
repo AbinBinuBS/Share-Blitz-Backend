@@ -52,7 +52,6 @@ class UserUseCase {
         try {
              console.log('verify otp worked in repo :',otp)
              let decodedToken = this.jwtToken.verifyOtp(token)
-             console.log('verify otp decodedtoken :',decodedToken)
              if(decodedToken){
                 const { user, otpExpiration } = decodedToken;
                 if (new Date() > new Date(otpExpiration)) {

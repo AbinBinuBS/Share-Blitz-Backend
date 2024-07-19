@@ -33,9 +33,10 @@ class adminController {
     async getAllPosts (req: Request ,res : Response) {
         try {
             console.log('get all posts worked')
-            // console.log(req.query)
-            const page = req.params.page
-            const postData = await this.adminUseCase.getAllPosts(page as string)
+            console.log(req.query)
+            const page = req.query.limit
+            const search = req.query.search
+            const postData = await this.adminUseCase.getAllPosts(page as string , search as string)
             console.log('user data :',postData)
             if(postData.success) {
                 return res.status(200).json({success:true,posts:postData?.data?.posts,total:postData?.data?.total})

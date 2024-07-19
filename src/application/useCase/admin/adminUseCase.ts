@@ -46,15 +46,13 @@ class AdminUseCase implements adminUseCaseInterface {
         }
      }
 
-     async getAllPosts(page:string)  {
+     async getAllPosts(page:string ,search:string)  {
         try {
-            const limit : number = 5
-            const skip :number = limit * (parseInt(page) -1)
-            console.log(skip,page)
-            console.log("worked get all users usecase")
-             const posts = await this.postRepository.getPostsByLimitToAdmin(skip ,limit)
+             const limit : number = 5
+             const skip :number = limit * (parseInt(page) -1)
+             console.log(skip,limit,page,search)
+             const posts = await this.postRepository.getPostsByLimitToAdmin(skip ,limit,search)
              const allPosts = await this.postRepository.getAllPostsToAdmin()
-
              console.log(posts)
              if(posts.success){
                  return {success:true,data:{posts:posts.data,total:allPosts?.data?.length || 0 }}
