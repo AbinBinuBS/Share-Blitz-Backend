@@ -121,7 +121,7 @@ class UserUseCase {
           
 
           console.log('token data usecase ---- :',userToken)
-          const tokenDecodedData = this.jwtToken.verifyJwt(userToken)
+          const tokenDecodedData = this.jwtToken.verifyOtp(userToken)
           console.log('token decoded data :',tokenDecodedData)
           if(!tokenDecodedData || !tokenDecodedData?.user) 
             return {success:false , message:"User not found in token"}
@@ -140,7 +140,7 @@ class UserUseCase {
                 { expiresIn: "5m" }
               );
               console.log('token',token)
-              let decodeToken = this.jwtToken.verifyJwt(token)
+              let decodeToken = this.jwtToken.verifyOtp(token)
               console.log('decoded token',decodeToken) 
 
             return {success:true,data:{data:false,token:token},userExists:false}
