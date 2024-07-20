@@ -158,7 +158,30 @@ class userController {
             console.log("G signup worked in controller")
             console.log(req.body)
             const {name,userName,email,picture} = req.body
-            const responseData : any= await this.userCase.Gsignup(name,userName, email, picture);
+            const user = await this.userCase.Gsignup(name,userName, email, picture);
+            if(user?.success){
+                res.cookie("userToken", user.token, {
+                    expires: new Date(Date.now() + 25892000000),
+                    httpOnly: true,
+                  });
+               return res.status(200).json({success:true,token:user.token,user:user.user})
+            } else {
+                return res.status(200).json({success:false,message:user?.message})
+            }
+       
+        } catch(error) {
+            res.status(500).send('Something went wrong')
+            console.log(error)
+        }
+    }
+
+    async Glogin (req : Request ,res:Response) {
+        try {
+            console.log("G login worked in controller")
+            console.log(req.body)
+            const {email} = req.body
+            const responseData = await this.userCase.Glogin( email);
+            // console.log('send dat g login;',user)
             if(responseData?.success){
                 const options = {
                             httpOnly:true,    
@@ -182,38 +205,7 @@ class userController {
                     message: responseData?.message || 'Unknown error',
                     success: false})
             }
-            // if(user?.success){
-            //     res.cookie("userToken", user.token, {
-            //         expires: new Date(Date.now() + 25892000000),
-            //         httpOnly: true,
-            //       });
-            //    return res.status(200).json({success:true,token:user.token,user:user.user})
-            // } else {
-            //     return res.status(200).json({success:false,message:user?.message})
-            // }
-       
-        } catch(error) {
-            res.status(500).send('Something went wrong')
-            console.log(error)
-        }
-    }
-
-    async Glogin (req : Request ,res:Response) {
-        try {
-            console.log("G login worked in controller")
-            console.log(req.body)
-            const {email} = req.body
-            const user = await this.userCase.Glogin( email);
-            // console.log('send dat g login;',user)
-            if(user?.success){
-                res.cookie("userToken", user.token, {
-                    expires: new Date(Date.now() + 25892000000),
-                    httpOnly: true,
-                  });
-               return res.status(200).json({success:true,token:user.token,user:user.user})
-            } else {
-                return res.status(200).json({success:false,message:user?.message})
-            }
+           
        
         } catch(error) {
             res.status(500).send('Something went wrong')
