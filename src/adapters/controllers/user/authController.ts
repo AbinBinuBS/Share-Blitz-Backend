@@ -158,16 +158,39 @@ class userController {
             console.log("G signup worked in controller")
             console.log(req.body)
             const {name,userName,email,picture} = req.body
-            const user = await this.userCase.Gsignup(name,userName, email, picture);
-            if(user?.success){
-                res.cookie("userToken", user.token, {
-                    expires: new Date(Date.now() + 25892000000),
-                    httpOnly: true,
-                  });
-               return res.status(200).json({success:true,token:user.token,user:user.user})
+            const responseData : any= await this.userCase.Gsignup(name,userName, email, picture);
+            if(responseData?.success){
+                const options = {
+                            httpOnly:true,    
+                            secure:true
+                        }
+                return res.status(200)
+                .cookie("accessToken",responseData.accessToken,options)
+                .cookie("refreshToken",responseData.refreshToken,options)
+                .json(new ApiResponse (200,{success:true,user : responseData.user ,accessToken: responseData.accessToken,refreshToken:responseData.refreshToken},"login sucessfully"))
+                // res.cookie("userToken", responseData.token, {
+                //     expires: new Date(Date.now() + 25892000000),
+                //     httpOnly: true,
+                //   });
+            //    return res.status(200).json({success:true,token:responseData.token,user:responseData.user})
             } else {
-                return res.status(200).json({success:false,message:user?.message})
+                return res.status(200).json({   statusCode: 200,
+                    data: {
+                        success: false,
+                        message: responseData?.message || 'Unknown error'
+                    },
+                    message: responseData?.message || 'Unknown error',
+                    success: false})
             }
+            // if(user?.success){
+            //     res.cookie("userToken", user.token, {
+            //         expires: new Date(Date.now() + 25892000000),
+            //         httpOnly: true,
+            //       });
+            //    return res.status(200).json({success:true,token:user.token,user:user.user})
+            // } else {
+            //     return res.status(200).json({success:false,message:user?.message})
+            // }
        
         } catch(error) {
             res.status(500).send('Something went wrong')

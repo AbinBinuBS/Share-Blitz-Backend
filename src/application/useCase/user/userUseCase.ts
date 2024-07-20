@@ -308,12 +308,16 @@ class UserUseCase {
                     return {success:false,message:"User is temporarily Blocked"}
                 } else {
                     // let token = this.jwtToken.createJwt(findUser._id,"user");
+                 const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(findUser._id)
+
                     let token =  jwt.sign(
                         {userId: findUser._id,role:findUser.role},
                         process.env.JWT_KEY as string,
                         { expiresIn: "60m" } 
                       );
                     const loggedUserData = await this.userRepository.getUserById(findUser._id as string)
+                    return {success:true,user:loggedUserData,accessToken,refreshToken}
+
                     // console.log('user data to send ;',loggedUserData)
                     return {success:true,user:loggedUserData,token:token}
                 }
