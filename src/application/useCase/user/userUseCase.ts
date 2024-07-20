@@ -272,6 +272,9 @@ class UserUseCase {
              const newUser = await this.userRepository.Gsignup({email,userName,name,password:hashedPassword,profileImageUrl:picture,loginType:UserLoginType.GOOGLE})
              if(newUser){
                 const userData = await this.userRepository.findByEmail(email)
+                const {accessToken,refreshToken} = await generateAccessAndRefreshTokens(userData._id)
+                return {success:true,user:userData,accessToken,refreshToken}
+
                 let token = this.jwtToken.createJwt(userData._id,"user");
                 if(userData && token){
                     return {success:true,user:userData,token}
