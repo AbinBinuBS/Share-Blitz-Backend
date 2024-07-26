@@ -56,7 +56,7 @@ const userSchema:Schema<UserI>=new Schema({
     backgroundImageUrl:{
         type:String,
         required:false,
-        default:  `https://e0.pxfuel.com/wallpapers/105/23/desktop-wallpaper-compromised-character-gaming-profile-dark-cute-cartoon-boys-thumbnail.jpg`,
+        default:  `https://drive.google.com/file/d/15_nseTo1RK8-MjN71y7Fjnk0yxvb-zYc/view?usp=sharing`,
          
     },
     role: {
