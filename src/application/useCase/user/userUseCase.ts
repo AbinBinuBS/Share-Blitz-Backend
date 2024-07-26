@@ -363,6 +363,23 @@ class UserUseCase {
         } 
      }
 
+     async updateBackgroundImage(userId : string ,backgroundImage:string  )  {
+        try {
+
+        
+            const updateImage = await this.userRepository.updateBackgroundImage(userId , backgroundImage) 
+          
+            if(updateImage.success){
+            const userData = await this.userRepository.getUserById(userId) 
+                return {success:true,data:userData}
+            }
+             return {success:false ,messgage:updateImage.message}
+            
+        } catch (error) {
+         console.log(error)
+        } 
+     }
+
      async savePost(userId : string,postId : string)  {
         try {
              const user = await this.userRepository.getUserById(userId)

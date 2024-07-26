@@ -2,6 +2,7 @@ import { Request , Response} from 'express'
 import { CustomRequest } from '../../../domain/interface/controllers/userControllerInterface';
 import asyncHandlers from '../../../infrastructure/utils/handlers/asyncHandlers';
 import ApiError from '../../../infrastructure/utils/handlers/ApiError';
+import ApiResponse from '../../../infrastructure/utils/handlers/ApiResponse';
 class userController {
     private connectionUseCase : any 
     private userUseCase : any 
@@ -25,7 +26,23 @@ class userController {
         }
     });
 
-   
+    backgroundImage = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        const { imageUrl } = req.body;
+        console.log(req.body)
+        const userId = req.userId
+        if (!imageUrl) {
+            throw new ApiError(400, 'Image Url is required');
+        }
+        const updateImage = await this.userUseCase.updateBackgroundImage(userId,imageUrl as string)
+        console.log("response back :",updateImage)
+        if(updateImage.success){
+         res.status(200).json(new ApiResponse(200,{userData : updateImage?.data},"Background changed successfully" ));
+        } else{
+            throw new ApiError(400, updateImage?.message);
+        }
+           
+    });
+    
 
     async followUser (req:CustomRequest ,res:Response) {
         try {

@@ -7,6 +7,8 @@ interface NotificationTypesEnum {
   ERROR: string
   FRIENDREQUEST:  string
   NEWMESSAGE :string
+  NEWFRIEND :string
+  LIKEDPOST:string
   DEFAULT : string
 }
 
@@ -46,6 +48,8 @@ export const USER_TEMPORARY_TOKEN_EXPIRY = 20 * 60 * 1000; // 20 minutes
 export const NotificationTypeEnum : NotificationTypesEnum = {
   ERROR: "ERROR",
   FRIENDREQUEST: "FRIENDREQUEST" ,
+  NEWFRIEND: "NEWFRIEND" ,
+  LIKEDPOST:"LIKEDPOST",
   NEWMESSAGE:"NEWMESSAGE",
   DEFAULT:"DEFAULT",
 };

@@ -6,6 +6,9 @@ import PostRepositoryInterface from "../../../domain/interface/repositories/user
 import HashPasswordInterface from "../../../domain/interface/helpers/hashPasswordInterface";
 import UserRepositoryInterface from "../../../domain/interface/repositories/user/userRepositoryInterface";
 import ConnectionRepositoryInterface from "../../../domain/interface/repositories/user/connectionRepositoryInterface";
+import { getReceiverSocketId } from "../../../infrastructure/Socket/socket";
+import { io } from "../../..";
+import { NotificationTypeEnum } from "../../../infrastructure/constants/userConstants";
 class ConnectionUseCase {
     private postRepository: PostRepositoryInterface;
     private userRepository: UserRepositoryInterface;
@@ -39,7 +42,10 @@ class ConnectionUseCase {
             const followUser = await this.connectionRepository.followUser(userId,targetUserId)
             const addFollowerTargetUser = await this.connectionRepository.addFollowers(targetUserId,userId)
             if(followUser.success && addFollowerTargetUser.success){
-                console.log("........sucess")
+                const receiverSocketId = getReceiverSocketId(targetUserId)
+                if(receiverSocketId) {
+                    io.to(receiverSocketId).emit(NotificationTypeEnum.NEWFRIEND,userId)
+                }
                 return {success:true,data:followUser.data}
             } 
             return {success:false,message:followUser?.message || addFollowerTargetUser?.message}

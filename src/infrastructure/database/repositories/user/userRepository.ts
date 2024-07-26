@@ -259,11 +259,6 @@ class UserRepository implements IUserRepository {
         httpOnly:true,
         secure:true
     }
-    // return res.status(200)
-    // .clearCookie("accessToken",options)
-    // .clearCookie("refreshToken",options)
-    // .json(new ApiResponse(200,{},"User loggedOut successfully"))
-     
 
       return { success: true, data: "" };
   } catch (error) {
@@ -282,6 +277,22 @@ class UserRepository implements IUserRepository {
         throw new Error('Error fetching user details');
     }
 }
-}
+
+async updateBackgroundImage(userId: string,backgroundImage : string): Promise<any> {
+  
+  try {
+     const updateImage = await UserModel.findByIdAndUpdate(userId,{backgroundImageUrl:backgroundImage})
+     if(updateImage)
+      return {success:true,updateImage};
+
+     return {success:false,message:"failed to update background image"};
+
+  } catch (error) {
+      console.error(error);
+      throw new Error('Error fetching user details');
+
+  }
+}}
+
 
 export default UserRepository

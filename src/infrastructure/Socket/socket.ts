@@ -60,7 +60,7 @@ const socketConfiguration =async (io: Server<DefaultEventsMap>) => {
 
     socket.on('createNotification',async(data)=>{
       console.log(' create ntificaions chats',data)
-      const res= await NotificationRepo.createNotification({type:data.type,senderId:data.senderId,userId,message:"You have a one new message"})
+      const res= await NotificationRepo.createNotification({type:data.type,senderId:data.senderId,userId,message:data.message})
       console.log('res',res)
       if(res.success) {
       const receiverSocketId = getReceiverSocketId(userId);
@@ -85,19 +85,7 @@ const socketConfiguration =async (io: Server<DefaultEventsMap>) => {
         io.to(receiverSocketId).emit('answeredCall',{ to:data.to});
     });
 
-    // socket.on('callUser', ({ userToCall, signalData, from, name }) => {
-    //   console.log(' call user received ',userToCall,from ,name)
-    //   const receiverSocketId = getReceiverSocketId(userToCall);
-
-    //   io.to(receiverSocketId).emit('callFromUser', { signal: signalData, from, name })
-    // });
-
-    // socket.on('answerCall', (data) => {
-    //   console.log("answered call",data.to)
-    //   const receiverSocketId = getReceiverSocketId(data.to);
-
-    //     io.to(receiverSocketId).emit('answeredCall', data.signal);
-    // });
+   
     socket.on('callEnded', (data) => {
       console.log(" call ended",data)
       const receiverSocketId = getReceiverSocketId(data.userId);

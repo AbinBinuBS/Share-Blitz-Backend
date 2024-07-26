@@ -27,6 +27,7 @@ const controller = new notificationController(notificationUseCase)
 const router = express.Router()
 
 router.get('/',userAuth,(req, res,next:NextFunction) => { controller.getNotifications(req, res,next) });
+router.post('/',userAuth,(req, res,next:NextFunction) => { controller.createNotification(req, res,next) });
 router.get('/:id',userAuth,(req, res,next:NextFunction) => { controller.getNotificationById(req, res,next) });
 router.patch('/toogleSeen',userAuth,(req, res,next:NextFunction) => { controller.toggleSeen(req, res,next) });
 

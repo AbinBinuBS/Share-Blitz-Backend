@@ -1,5 +1,5 @@
 
-import express from "express"
+import express, { NextFunction } from "express"
 import userController from '../../../adapters/controllers/user/userController'
 import postRepository from '../../database/repositories/user/postRepository'
 import UserRepository from "../../database/repositories/user/userRepository"
@@ -34,6 +34,7 @@ router.get('/checkIsFriend',userAuth, (req, res) => { controller.checkIsFriend(r
 router.get('/suggestedUsers',userAuth, (req, res) => { controller.suggestedUsers(req, res) });
 router.get('/searchUser',userAuth, (req, res) => { controller.searchUser(req, res) });
 router.patch('/changePrivacy',userAuth, (req, res) => { controller.changePrivacy(req, res) });
+router.patch('/backgroundImage',userAuth, (req, res,next:NextFunction) => { controller.backgroundImage(req, res,next) });
 
 
 router.get('/isRequestedVerification',userAuth, (req, res) => { controller.isRequestedVerification(req, res) });

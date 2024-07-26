@@ -48,7 +48,16 @@ class notificationController {
         } 
     });
   
-
+    createNotification = asyncHandlers(async (req: CustomRequest, res: Response) => {
+        console.log("create notification received ")
+       const { type , senderId,userId,message} = req.body        
+        const createNotification = await this.notificationUseCase.createNotification(userId as string,senderId as string , type as string , message as string)
+        if(createNotification.success){
+            res.status(200).json(new ApiResponse(200,{notifications: createNotification.data}, 'Notification created successfully'));
+        } else {
+            throw new ApiError(400, createNotification.message);
+        } 
+    });
     
    
 }

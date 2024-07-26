@@ -38,6 +38,21 @@ class NotificationUseCase implements NotificationUseCaseInterface{
            console.log(error)         
         }
      }
-}
+
+         
+     async createNotification(userId : string,senderId : string , type : string , message : string) 
+       {
+      try {
+           let createNotification = await this.notificationRepository.createNotification({userId,senderId,type,message})
+           if(createNotification?.success){
+           return {success:true,data:createNotification.data}
+           }
+           return {success:false,message:createNotification?.message}
+
+      } catch (error) {
+         console.log(error)         
+      }
+   }
+}  
 
 export default NotificationUseCase
