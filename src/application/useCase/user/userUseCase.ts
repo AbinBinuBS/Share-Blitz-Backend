@@ -482,17 +482,17 @@ class UserUseCase {
                 return { success: false, message: 'User not found' };
             }
             const followers = currentUser.data.followings.map((follower: {userId:string}) => follower.userId);
-            // const followings = currentUser.followings.map((following: any) => following.userId);
-            // console.log("followers ",followers)
+         
             const friends = new Set([...followers, userId]);
-            // console.log("friends ",friends)
-            // Get all users
+          
             const allUsers = await this.userRepository.getAllUsers();
             
             // Filter out the friends from the allUsers list
             if(!allUsers?.data) return 
-            const suggestedUsers = allUsers?.data.filter((user: any) => !friends.has(user._id.toString()));
-            // console.log("suggested users ",suggestedUsers.length)
+            // const suggestedUsers = allUsers?.data.filter((user: any) => !friends.has(user._id.toString()));
+            const suggestedUsers = allUsers.data
+            .filter((user: any) => user._id.toString() !== userId && !friends.has(user._id.toString()))
+            .slice(0, 10); 
             return { success: true, data: suggestedUsers };
             } catch (error) {
             console.log(error);
