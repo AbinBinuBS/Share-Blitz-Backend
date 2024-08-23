@@ -7,6 +7,7 @@ const userSocketMap: { [key: string]: string } = {}; // {userId : socketId}
 
 import NotificationRepository from "../database/repositories/user/notificationRepository";
 const NotificationRepo = new NotificationRepository()
+
 export const getReceiverSocketId = (receiverId : string) => {
   return userSocketMap[receiverId]
 }
@@ -27,7 +28,7 @@ const socketConfiguration =async (io: Server<DefaultEventsMap>) => {
 
     io.to(receiverSocketId).emit('connected',userId)
     io.emit("getOnlineUsers",Object.keys(userSocketMap))
-    // io.emit("newMessage",Object.keys(userSocketMap))
+    // io.emit("newMessage",Object.keys(userSocketMap)) 
     console.log("emited users keys",Object.keys(userSocketMap))
 
     socket.on('message-page', (userId) => {

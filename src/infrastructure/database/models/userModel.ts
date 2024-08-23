@@ -56,7 +56,7 @@ const userSchema:Schema<UserI>=new Schema({
     backgroundImageUrl:{
         type:String,
         required:false,
-        default:  `https://drive.google.com/file/d/15_nseTo1RK8-MjN71y7Fjnk0yxvb-zYc/view?usp=sharing`,
+        default:  `http://res.cloudinary.com/dedoqbb6x/image/upload/v1722008385/ShareBlitz/Post/filename_r1h3ct.jpg`,
          
     },
     role: {
